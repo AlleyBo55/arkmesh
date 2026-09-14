@@ -1,0 +1,16 @@
+# Build output
+/arkmesh
+/bin/
+
+# Locally packed capsules and large model files
+*.ark/
+*.gguf
+*.safetensors
+
+# OS and editor files
+.DS_Store
+.idea/
+.vscode/
+
+# Local Kiro session settings
+.kiro/settings/cli.json
