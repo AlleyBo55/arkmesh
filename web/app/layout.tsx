@@ -99,6 +99,7 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
                 </Link>
                 <nav className="flex items-center gap-1 sm:gap-3 md:gap-5" aria-label="Primary navigation">
                   <Link href="/" className="flex min-h-11 items-center px-1 text-blue-200 hover:text-white sm:px-2">[Home]</Link>
+                  <Link href="/learn" className="flex min-h-11 items-center px-1 text-blue-200 hover:text-white sm:px-2">[Learn]</Link>
                   <Link href="/wiki" className="flex min-h-11 items-center px-1 text-blue-200 hover:text-white sm:px-2">[Wiki]</Link>
                   <a href={repositoryUrl} target="_blank" rel="noreferrer" className="flex min-h-11 items-center px-1 text-cyan-200 hover:text-white sm:px-2">[Source]</a>
                 </nav>

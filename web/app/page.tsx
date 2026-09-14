@@ -21,6 +21,22 @@ export default function HomePage() {
     <main>
       <OceanJourney />
 
+      <section className="home-key" aria-labelledby="home-key-title">
+        <div className="content-grid home-key-grid">
+          <div className="home-key-symbol" aria-hidden="true"><span>ARK</span><strong>KEY</strong><i /></div>
+          <div className="home-key-copy">
+            <div className="section-kicker mb-6">A key against capability extinction</div>
+            <h2 id="home-key-title">Save open AI from extinction.</h2>
+            <p className="home-key-definition"><strong>Extinction has a precise meaning here:</strong> a useful open capability can no longer be obtained, verified, or run because its host, files, runtime context, or trust evidence disappeared. This is infrastructure language, not a claim that software is alive.</p>
+            <p>ArkMesh is not the final answer. It is an executable question that a stronger researcher can reproduce, challenge, simplify, or carry further.</p>
+            <div className="home-key-actions">
+              <Link href="/learn">Take the learning path</Link>
+              <a href="https://github.com/AlleyBo55/arkmesh" target="_blank" rel="noreferrer">Carry the key forward ↗</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section id="continuity-visual" className="content-grid scroll-mt-20 pb-20 md:pb-28" aria-labelledby="continuity-visual-title">
         <div className="mb-8 grid gap-5 md:grid-cols-[1fr_0.75fr] md:items-end">
           <div>
