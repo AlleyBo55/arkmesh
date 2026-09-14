@@ -44,5 +44,10 @@ func FuzzCapsuleEnvelopeDecoders(f *testing.F) {
 				_, _ = decodeRecoverySignature(approval.Signature)
 			}
 		}
+		var proof ChunkProof
+		if json.Unmarshal(data, &proof) == nil {
+			_ = VerifyChunkProof(manifest, proof)
+			_ = verifyChunkPath(proof.ChunkRoot, proof.ChunkCount, proof.ChunkIndex, chunkLeafDigest(data), proof.Path)
+		}
 	})
 }

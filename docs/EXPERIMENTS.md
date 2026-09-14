@@ -58,8 +58,12 @@ Status: implemented in the reference CLI and automated tests.
 28. Produce detached approvals from two recovery identities.
 29. Assemble and advance the checkpoint as `verified_threshold_recovery`.
 30. Confirm one approval, duplicate approvals, modified evidence, and revoked approvals below threshold fail.
+31. Pack a multi chunk asset and confirm the signed chunk root verifies.
+32. Produce a possession proof for one chunk and verify it while holding only the manifest.
+33. Alter the chunk bytes, the chunk index, and the proof path, and confirm each is rejected.
+34. Corrupt a stored object and confirm both capsule verification and proof generation fail.
 
-Pass condition: intact objects, valid signatures, same-author ancestry, exact planned rotations, retained local checkpoints, and threshold recovery verify. Tested modifications, wrong parents, reused transitions, revoked signers, insufficient recovery approvals, unauthorized descendants, and rollback to an old capsule are rejected. Trust is never inferred from an embedded public key, and unsigned root compatibility remains explicit.
+Pass condition: intact objects, valid signatures, same-author ancestry, exact planned rotations, retained local checkpoints, threshold recovery, and chunk commitments verify. Tested modifications, wrong parents, reused transitions, revoked signers, insufficient recovery approvals, unauthorized descendants, forged chunk proofs, and rollback to an old capsule are rejected. Trust is never inferred from an embedded public key, and unsigned root compatibility remains explicit.
 
 ## E1: Three-node LAN continuity
 

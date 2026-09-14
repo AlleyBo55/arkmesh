@@ -44,6 +44,8 @@ func run(args []string, stdout, stderr io.Writer) int {
 		err = runCheckpoint(args[1:], stdout, stderr)
 	case "recovery":
 		err = runRecovery(args[1:], stdout, stderr)
+	case "chunks":
+		err = runChunks(args[1:], stdout, stderr)
 	case "pack":
 		err = runPack(args[1:], stdout, stderr)
 	case "inspect":
@@ -135,6 +137,7 @@ func runPack(args []string, stdout, stderr io.Writer) error {
 	signingKey := flags.String("signing-key", "", "private identity used to sign the capsule")
 	rotationKey := flags.String("rotation-key", "", "parent private identity authorizing a new child signer")
 	recoveryPolicyPath := flags.String("recovery-policy", "", "recovery policy that will authorize a new child signer")
+	chunkSize := flags.Int64("chunk-size", 0, "chunk commitment size in bytes (default 1 MiB)")
 	parentPath := flags.String("parent", "", "verified parent capsule directory")
 	var assets repeatedFlags
 	flags.Var(&assets, "asset", "asset as role=/path/to/file (repeatable)")
@@ -227,6 +230,7 @@ func runPack(args []string, stdout, stderr io.Writer) error {
 
 	manifest, err := capsule.PackWithOptions(*name, *output, sources, time.Now(), capsule.PackOptions{
 		ParentCapsuleID: parentCapsuleID,
+		ChunkSize:       *chunkSize,
 	})
 	if err != nil {
 		return err
@@ -382,9 +386,12 @@ Usage:
   arkmesh recovery policy create --threshold N --identity PUBLIC_IDENTITY [--identity ...] --out FILE
   arkmesh recovery approve --policy POLICY --signing-key PRIVATE_IDENTITY --parent PARENT --out FILE CHILD
   arkmesh recovery assemble --policy POLICY --parent PARENT --approval FILE [--approval ...] [--revocations FILE] CHILD
-  arkmesh pack --name NAME --out DIR --asset role=/path/to/file [--asset ...] [--signing-key PRIVATE_IDENTITY] [--parent PARENT_CAPSULE] [--rotation-key PARENT_PRIVATE_IDENTITY] [--recovery-policy POLICY]
+  arkmesh chunks inspect CAPSULE
+  arkmesh chunks prove --asset DIGEST --index N --out FILE CAPSULE
+  arkmesh chunks check --proof FILE CAPSULE
+  arkmesh pack --name NAME --out DIR --asset role=/path/to/file [--asset ...] [--signing-key PRIVATE_IDENTITY] [--parent PARENT_CAPSULE] [--rotation-key PARENT_PRIVATE_IDENTITY] [--recovery-policy POLICY] [--chunk-size BYTES]
   arkmesh inspect DIR
   arkmesh verify [--trust PUBLIC_IDENTITY] [--revocations FILE] [--checkpoint FILE] [--require-signature] [--require-trusted] [--parent PARENT_CAPSULE] [--require-lineage] DIR
 
-Integrity verification remains available for unsigned capsules. Parent-signed transitions authorize exact planned rotations. Threshold recovery requires distinct approvals under explicit local policy. Local checkpoints reject rollback to another capsule head. Local revocation policy overrides trust.`)
+Integrity verification remains available for unsigned capsules. Signed chunk roots allow single chunk possession proofs. Parent-signed transitions authorize exact planned rotations. Threshold recovery requires distinct approvals under explicit local policy. Local checkpoints reject rollback to another capsule head. Local revocation policy overrides trust.`)
 }

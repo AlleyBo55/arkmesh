@@ -16,6 +16,16 @@ These are release gates, not aspirations.
 3. Unknown fields, duplicate fields, trailing JSON values, symlinks, and nonregular objects fail closed.
 4. Unsigned compatibility never satisfies a requirement for signatures or trust.
 
+## Chunk commitments
+
+1. A chunk root and chunk size live in the manifest, so the capsule signature covers them.
+2. Leaves and internal nodes use distinct domain prefixes.
+3. An unpaired node is promoted, never duplicated.
+4. Chunk count is derived from the signed asset size, never from a proof.
+5. Proof verification compares every restated field against the signed manifest.
+6. Sibling direction is derived from the index and level sizes, so proofs carry no direction bits.
+7. A possession proof carries real chunk bytes and proves possession only at that moment.
+
 ## Authority
 
 1. Same-author lineage, planned rotation, and threshold recovery are mutually exclusive evidence paths.
