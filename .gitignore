@@ -11,3 +11,6 @@
 .DS_Store
 .idea/
 .vscode/
+
+# Local Kiro session settings
+.kiro/settings/cli.json
