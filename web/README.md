@@ -64,7 +64,7 @@ A visible roadmap card is not an implementation claim. The status comes from the
 - Redux Toolkit and React Redux
 - ESLint 9, the newest release currently supported by every plugin bundled with the Next.js configuration
 
-The visual system uses local fonts, semantic SVG geometry, restrained motion, and no remote runtime assets. The wider experience is future-facing editorial design; monospaced command styling is reserved for the real interactive console and protocol evidence.
+The visual system uses local fonts, procedural Three.js geometry, shaders, and no remote runtime assets. The landing page maps native reversible scroll to a deep-sea camera journey through five truthful mission beats. Three.js loads only after the visitor begins scrolling; reduced-motion and no-WebGL paths retain the complete story in ordinary document flow. Monospaced command styling remains reserved for the interactive console and protocol evidence.
 
 ## Deployment metadata
 

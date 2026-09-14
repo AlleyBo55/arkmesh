@@ -1763,3 +1763,619 @@ body::before {
     border-radius: 20px;
   }
 }
+
+
+/* Immersive continuity descent */
+.ocean-journey {
+  --dive-progress: 0;
+  position: relative;
+  height: 500svh;
+  background: #03050b;
+  isolation: isolate;
+}
+
+.ocean-stage {
+  position: sticky;
+  top: 56px;
+  height: calc(100svh - 56px);
+  min-height: 560px;
+  overflow: hidden;
+  color: var(--ink);
+  background:
+    radial-gradient(circle at 50% 5%, rgba(105, 210, 235, 0.17), transparent 38%),
+    linear-gradient(180deg, #142c48, #07101f 54%, #03050b);
+}
+
+.ocean-canvas,
+.ocean-vignette,
+.ocean-caustics {
+  position: absolute;
+  inset: 0;
+}
+
+.ocean-canvas {
+  z-index: 0;
+}
+
+.ocean-canvas canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.ocean-vignette {
+  z-index: 2;
+  background:
+    linear-gradient(90deg, rgba(2, 4, 9, 0.62), transparent 38%, transparent 68%, rgba(2, 4, 9, 0.4)),
+    linear-gradient(180deg, rgba(2, 4, 9, 0.08), transparent 55%, rgba(2, 4, 9, 0.7));
+  pointer-events: none;
+}
+
+.ocean-caustics {
+  z-index: 1;
+  opacity: clamp(0, calc(0.48 - var(--dive-progress) * 0.9), 0.48);
+  background:
+    repeating-radial-gradient(ellipse at 50% -10%, transparent 0 28px, rgba(138, 232, 255, 0.055) 31px 32px, transparent 35px 62px);
+  filter: blur(1px);
+  animation: ocean-caustics 10s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+.ocean-hud,
+.ocean-skip,
+.ocean-depth,
+.ocean-reticle,
+.ocean-principles,
+.ocean-chapters {
+  position: absolute;
+  z-index: 4;
+}
+
+.ocean-hud {
+  top: 0;
+  right: 0;
+  left: 0;
+  display: flex;
+  min-height: 72px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 clamp(20px, 3.2vw, 54px);
+  border-bottom: 1px solid rgba(200, 220, 255, 0.12);
+  font-family: var(--font-mono);
+  pointer-events: none;
+}
+
+.ocean-hud-brand {
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: 0 10px;
+  align-items: center;
+}
+
+.ocean-hud-brand > span {
+  grid-row: span 2;
+  display: grid;
+  width: 34px;
+  aspect-ratio: 1;
+  place-items: center;
+  border: 1px solid var(--cyan);
+  color: var(--cyan);
+  font-size: 0.66rem;
+  font-weight: 900;
+}
+
+.ocean-hud-brand strong {
+  font-size: 0.75rem;
+  letter-spacing: 0.16em;
+}
+
+.ocean-hud-brand small,
+.ocean-hud-status {
+  color: rgba(210, 220, 235, 0.58);
+  font-size: 0.5rem;
+  letter-spacing: 0.12em;
+}
+
+.ocean-hud-status {
+  display: flex;
+  gap: 9px;
+  align-items: center;
+}
+
+.ocean-hud-status i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 12px var(--green);
+  animation: ocean-status 1.8s ease-in-out infinite;
+}
+
+.ocean-hud-status span {
+  padding-left: 9px;
+  border-left: 1px solid rgba(200, 220, 255, 0.2);
+  color: var(--amber);
+}
+
+.ocean-skip {
+  top: 90px;
+  right: clamp(20px, 3.2vw, 54px);
+  padding: 8px 0;
+  color: rgba(225, 229, 239, 0.62);
+  font-family: var(--font-mono);
+  font-size: 0.56rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.ocean-skip:hover,
+.ocean-skip:focus-visible {
+  color: white;
+  outline: 1px solid var(--cyan);
+  outline-offset: 7px;
+}
+
+.ocean-chapters {
+  inset: 0;
+  pointer-events: none;
+}
+
+.ocean-chapter {
+  position: absolute;
+  bottom: clamp(108px, 14vh, 170px);
+  left: clamp(20px, 6vw, 96px);
+  width: min(760px, calc(100% - 190px));
+  opacity: 0;
+  filter: blur(8px);
+  transform: translateY(32px);
+  transition: opacity 500ms ease, filter 650ms ease, transform 650ms cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+}
+
+.ocean-chapter.is-active {
+  opacity: 1;
+  filter: blur(0);
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.ocean-chapter-index {
+  display: flex;
+  width: min(420px, 100%);
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(200, 220, 255, 0.2);
+  color: var(--cyan);
+  font-family: var(--font-mono);
+  font-size: clamp(0.54rem, 0.7vw, 0.66rem);
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.ocean-chapter-index strong {
+  color: rgba(232, 232, 255, 0.7);
+}
+
+.ocean-chapter h1,
+.ocean-chapter h2 {
+  max-width: 850px;
+  color: #f4f2ed;
+  font-family: var(--font-display);
+  font-size: clamp(3.6rem, 7.8vw, 8.2rem);
+  font-weight: 760;
+  line-height: 0.84;
+  letter-spacing: -0.075em;
+  text-wrap: balance;
+  text-shadow: 0 8px 50px rgba(0, 0, 0, 0.38);
+}
+
+.ocean-chapter:not(:first-child) h2 {
+  font-size: clamp(3.1rem, 6.6vw, 6.7rem);
+}
+
+.ocean-chapter p {
+  max-width: 630px;
+  margin-top: clamp(20px, 3vh, 34px);
+  padding-left: 18px;
+  border-left: 1px solid rgba(138, 232, 255, 0.65);
+  color: rgba(229, 234, 243, 0.82);
+  font-size: clamp(0.92rem, 1.15vw, 1.08rem);
+  line-height: 1.75;
+  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.8);
+}
+
+.ocean-dive-cue {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  margin-top: 24px;
+  color: rgba(220, 229, 239, 0.68);
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.ocean-dive-cue i {
+  position: relative;
+  width: 1px;
+  height: 42px;
+  overflow: hidden;
+  background: rgba(138, 232, 255, 0.3);
+}
+
+.ocean-dive-cue i::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  background: var(--cyan);
+  transform: translateY(-100%);
+  animation: ocean-dive 2s ease-in-out infinite;
+}
+
+.ocean-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 26px;
+}
+
+.ocean-actions a {
+  display: inline-flex;
+  min-height: 46px;
+  align-items: center;
+  justify-content: center;
+  padding: 11px 18px;
+  border: 1px solid rgba(232, 232, 255, 0.46);
+  border-radius: 999px;
+  color: var(--ink);
+  background: rgba(7, 10, 17, 0.68);
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  backdrop-filter: blur(12px);
+}
+
+.ocean-actions a:first-child {
+  border-color: var(--pearl);
+  color: #15131f;
+  background: var(--pearl);
+}
+
+.ocean-actions a:hover,
+.ocean-actions a:focus-visible {
+  border-color: var(--cyan);
+  color: #15131f;
+  background: var(--cyan);
+  outline: 2px solid white;
+  outline-offset: 3px;
+}
+
+.ocean-depth {
+  top: 50%;
+  right: clamp(20px, 3.2vw, 54px);
+  display: grid;
+  grid-template-columns: auto 2px;
+  gap: 9px 13px;
+  color: rgba(224, 229, 239, 0.72);
+  font-family: var(--font-mono);
+  text-align: right;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.ocean-depth > span {
+  align-self: end;
+  font-size: clamp(0.72rem, 1vw, 0.9rem);
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.ocean-depth > div {
+  grid-row: span 2;
+  position: relative;
+  width: 2px;
+  height: min(34vh, 300px);
+  overflow: hidden;
+  background: rgba(200, 220, 255, 0.14);
+}
+
+.ocean-depth > div i {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(var(--cyan), var(--violet), var(--amber));
+  transform: scaleY(var(--dive-progress));
+  transform-origin: top;
+}
+
+.ocean-depth small {
+  color: rgba(200, 211, 225, 0.44);
+  font-size: 0.48rem;
+  line-height: 1.55;
+  letter-spacing: 0.1em;
+}
+
+.ocean-reticle {
+  top: 50%;
+  left: 50%;
+  display: grid;
+  width: 86px;
+  aspect-ratio: 1;
+  place-items: center;
+  border: 1px solid rgba(138, 232, 255, 0.22);
+  border-radius: 50%;
+  opacity: clamp(0, calc((var(--dive-progress) - 0.27) * 3.6), 0.68);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.ocean-reticle::before,
+.ocean-reticle::after {
+  position: absolute;
+  content: "";
+  background: rgba(138, 232, 255, 0.28);
+}
+
+.ocean-reticle::before { width: 112px; height: 1px; }
+.ocean-reticle::after { width: 1px; height: 112px; }
+
+.ocean-reticle i {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--cyan);
+  box-shadow: 0 0 16px var(--cyan);
+}
+
+.ocean-reticle span {
+  position: absolute;
+  top: calc(100% + 11px);
+  font-family: var(--font-mono);
+  font-size: 0.46rem;
+  letter-spacing: 0.12em;
+  white-space: nowrap;
+}
+
+.ocean-principles {
+  right: clamp(20px, 3.2vw, 54px);
+  bottom: 26px;
+  left: clamp(20px, 3.2vw, 54px);
+  display: flex;
+  gap: 24px;
+  justify-content: flex-end;
+  color: rgba(210, 220, 232, 0.42);
+  font-family: var(--font-mono);
+  font-size: clamp(0.46rem, 0.58vw, 0.56rem);
+  letter-spacing: 0.11em;
+  pointer-events: none;
+}
+
+.ocean-principles span + span::before {
+  margin-right: 24px;
+  color: var(--cyan);
+  content: "/";
+}
+
+.ocean-reduced-story {
+  display: none;
+}
+
+@keyframes ocean-caustics {
+  from { transform: translate3d(-2%, -1%, 0) scale(1.04); }
+  to { transform: translate3d(2%, 1%, 0) scale(1.1); }
+}
+
+@keyframes ocean-status {
+  50% { opacity: 0.38; transform: scale(0.72); }
+}
+
+@keyframes ocean-dive {
+  0%, 15% { transform: translateY(-100%); }
+  70%, 100% { transform: translateY(100%); }
+}
+
+@media (max-width: 767px) {
+  .ocean-journey {
+    height: 460svh;
+  }
+
+  .ocean-stage {
+    top: 54px;
+    height: calc(100svh - 54px);
+    min-height: 500px;
+  }
+
+  .ocean-hud {
+    min-height: 58px;
+    padding-inline: 13px;
+  }
+
+  .ocean-hud-brand > span {
+    width: 29px;
+  }
+
+  .ocean-hud-brand strong {
+    font-size: 0.64rem;
+  }
+
+  .ocean-hud-brand small,
+  .ocean-hud-status {
+    font-size: 0.42rem;
+  }
+
+  .ocean-hud-status span,
+  .ocean-skip,
+  .ocean-principles span:nth-child(-n + 2),
+  .ocean-depth small {
+    display: none;
+  }
+
+  .ocean-skip {
+    top: 72px;
+    right: 14px;
+  }
+
+  .ocean-chapter {
+    bottom: 80px;
+    left: 14px;
+    width: calc(100% - 56px);
+  }
+
+  .ocean-chapter-index {
+    width: 100%;
+    margin-bottom: 14px;
+  }
+
+  .ocean-chapter h1,
+  .ocean-chapter h2,
+  .ocean-chapter:not(:first-child) h2 {
+    font-size: clamp(3.1rem, 15.8vw, 5.7rem);
+    line-height: 0.87;
+  }
+
+  .ocean-chapter p {
+    margin-top: 18px;
+    padding-left: 12px;
+    font-size: 0.88rem;
+    line-height: 1.62;
+  }
+
+  .ocean-dive-cue {
+    margin-top: 16px;
+  }
+
+  .ocean-dive-cue i {
+    height: 28px;
+  }
+
+  .ocean-actions {
+    gap: 7px;
+    margin-top: 18px;
+  }
+
+  .ocean-actions a {
+    min-height: 40px;
+    padding: 9px 13px;
+    font-size: 0.52rem;
+  }
+
+  .ocean-depth {
+    right: 13px;
+    gap: 8px;
+  }
+
+  .ocean-depth > div {
+    height: 26vh;
+  }
+
+  .ocean-reticle {
+    width: 64px;
+  }
+
+  .ocean-reticle::before { width: 82px; }
+  .ocean-reticle::after { height: 82px; }
+
+  .ocean-principles {
+    right: 13px;
+    bottom: 15px;
+    left: 13px;
+    justify-content: flex-end;
+  }
+}
+
+@media (max-width: 380px), (max-height: 670px) {
+  .ocean-chapter {
+    bottom: 54px;
+  }
+
+  .ocean-chapter h1,
+  .ocean-chapter h2,
+  .ocean-chapter:not(:first-child) h2 {
+    font-size: clamp(2.65rem, 14vw, 4.5rem);
+  }
+
+  .ocean-chapter p {
+    font-size: 0.8rem;
+    line-height: 1.48;
+  }
+
+  .ocean-chapter-index {
+    margin-bottom: 10px;
+  }
+
+  .ocean-dive-cue {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ocean-journey {
+    height: auto;
+    background: #080a10;
+  }
+
+  .ocean-stage {
+    display: none;
+  }
+
+  .ocean-reduced-story {
+    display: grid;
+    gap: 1px;
+    padding: 24px 20px 80px;
+    background: rgba(200, 211, 255, 0.1);
+  }
+
+  .ocean-reduced-story article {
+    min-height: 68svh;
+    padding: clamp(28px, 7vw, 88px);
+    color: var(--ink);
+    background: linear-gradient(145deg, #111827, #080a10);
+  }
+
+  .ocean-reduced-story span {
+    color: var(--cyan);
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .ocean-reduced-story h1,
+  .ocean-reduced-story h2 {
+    max-width: 900px;
+    margin-top: 20px;
+    font-family: var(--font-display);
+    font-size: clamp(3rem, 9vw, 7rem);
+    font-weight: 760;
+    line-height: 0.9;
+    letter-spacing: -0.07em;
+  }
+
+  .ocean-reduced-story p {
+    max-width: 640px;
+    margin-top: 28px;
+    color: #cbd0dc;
+    line-height: 1.8;
+  }
+}
+
+
+/* overflow: hidden creates a scroll container and breaks the pinned dive stage. */
+.screen-shell {
+  overflow: clip;
+}
+
+
+html,
+body {
+  overflow-x: clip;
+}
+
+.screen-shell {
+  overflow: visible;
+}

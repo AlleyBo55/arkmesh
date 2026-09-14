@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { CommandConsole } from "@/components/command-console";
 import { ContinuitySimulator } from "@/components/continuity-simulator";
-import { HeroMesh } from "@/components/hero-mesh";
+import { OceanJourney } from "@/components/ocean-journey";
 import {
   benchmarkRows,
   implementedCapabilities,
@@ -19,45 +19,7 @@ const topology = ` ORIGINAL HOST          SURVIVING SHARDS          FRESH DEVICE
 export default function HomePage() {
   return (
     <main>
-      <section className="hero-section content-grid">
-        <div className="hero-eyebrow">
-          <span>OPEN-SOURCE FOUNDATION PROJECT</span>
-          <span className="hero-eyebrow-line" />
-          <span>EST. 2026</span>
-        </div>
-        <div className="hero-grid">
-          <div className="hero-copy min-w-0">
-            <div className="section-kicker mb-7">A continuity question for everyone</div>
-            <h1 className="big-type hero-title">
-              What if
-              <br />
-              <span className="text-cyan-200">AI goes</span>
-              <br />
-              <span className="outline-type">dark?</span>
-            </h1>
-            <p className="hero-lead">
-              What if the internet goes down, a useful model is withdrawn, or its original host disappears? ArkMesh asks whether open AI models, runtimes, knowledge, and instructions can be packaged, verified, and voluntarily seeded across trusted peers so communities can recover them without one provider.
-            </p>
-            <div className="hero-actions">
-              <Link href="/wiki#overview" className="hero-action-primary">
-                Read the thesis
-              </Link>
-              <a href="https://github.com/AlleyBo55/arkmesh" target="_blank" rel="noreferrer" className="hero-action-secondary">
-                Join on GitHub ↗
-              </a>
-            </div>
-          </div>
-          <HeroMesh />
-        </div>
-        <div className="hero-scroll" aria-hidden="true"><span>SCROLL TO ENTER THE ARCHIVE</span><i /></div>
-      </section>
-
-      <div className="signal-ribbon" aria-label="ArkMesh principles">
-        <span>NO CLOUD LOGIN</span>
-        <span>NO CENTRAL TRACKER</span>
-        <span>EXPLICIT HUMAN CONSENT</span>
-        <span>AUTHENTICITY BEFORE AVAILABILITY</span>
-      </div>
+      <OceanJourney />
 
       <section id="continuity-visual" className="content-grid scroll-mt-20 pb-20 md:pb-28" aria-labelledby="continuity-visual-title">
         <div className="mb-8 grid gap-5 md:grid-cols-[1fr_0.75fr] md:items-end">

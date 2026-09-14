@@ -141,7 +141,7 @@ Unsigned capsules remain supported for local integrity checks. Object paths come
 
 ## Web interface
 
-The command-aware landing page and complete system wiki live in [`web`](web/README.md). They present implemented evidence and planned protocol work through a cinematic editorial experience without pretending that browser commands execute ArkMesh operations.
+The command-aware landing page and complete system wiki live in [`web`](web/README.md). The landing begins with a native-scroll deep-sea journey through ArkMesh's continuity thesis, then resolves into implemented evidence, planned protocol work, and an honest command interface.
 
 ```bash
 cd web
