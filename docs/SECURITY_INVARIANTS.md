@@ -28,6 +28,9 @@ These are release gates, not aspirations.
 8. A chunk tree file is authenticated by recomputing the signed root, never trusted because it was supplied.
 9. Repair verifies each donor chunk against the authenticated tree before writing it, and never writes unverified bytes.
 10. Parallel object verification reports the same asset as sequential verification.
+11. An erasure plan is not a trust anchor: reconstructed bytes are verified against the signed manifest before they are written.
+12. Recovery writes through a temporary file and refuses to replace an object when verification fails.
+13. Recovery refuses to proceed when fewer than the required number of usable shards survive.
 
 ## Authority
 
