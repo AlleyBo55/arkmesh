@@ -1,6 +1,8 @@
 # ArkMesh web interface
 
-A command-first landing page and system wiki for ArkMesh, an open-source foundation project researching how useful open AI can survive outages, withdrawn hosts, and infrastructure failure through verifiable, consent-based peer preservation.
+A mission-first landing page, eight-module learning path, and system wiki for ArkMesh, an open-source foundation project researching how useful open AI can remain obtainable, verifiable, and runnable through outages, withdrawn hosts, and infrastructure failure.
+
+The learning path uses "AI extinction" precisely to mean loss of an open capability and its required context, not consciousness or biological life. It separates verified experiments from planned research and gives students and researchers a reproducible route from capsule construction through recovery, consent, inference, and open protocol questions.
 
 This is not a SaaS interface. The landing page leads with the public research question, distinguishes the planned peer network from current local evidence, and invites collaboration across distributed systems, cryptography, local AI runtimes, and digital preservation.
 
