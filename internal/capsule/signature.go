@@ -184,6 +184,9 @@ func writeSignature(root string, envelope SignatureEnvelope) error {
 }
 
 func decodeSignature(data []byte, envelope *SignatureEnvelope) error {
+	if err := rejectDuplicateJSONKeys(data); err != nil {
+		return err
+	}
 	decoder := json.NewDecoder(bytes.NewReader(data))
 	decoder.DisallowUnknownFields()
 	if err := decoder.Decode(envelope); err != nil {

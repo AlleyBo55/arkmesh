@@ -163,6 +163,9 @@ func writeAuthority(root string, transition AuthorityTransition) error {
 }
 
 func decodeAuthority(data []byte, transition *AuthorityTransition) error {
+	if err := rejectDuplicateJSONKeys(data); err != nil {
+		return err
+	}
 	decoder := json.NewDecoder(bytes.NewReader(data))
 	decoder.DisallowUnknownFields()
 	if err := decoder.Decode(transition); err != nil {

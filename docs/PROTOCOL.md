@@ -142,7 +142,7 @@ After object and manifest integrity checks, verification reports one of three su
 - `valid_unknown_author`: the signature is valid, but the signer is absent from the supplied trust set
 - `valid_trusted_author`: the signature is valid and exactly matches a supplied public identity
 
-Verification fails for unknown or trailing manifest fields, malformed envelopes, unsupported schemas or algorithms, changed capsule IDs, invalid key fingerprints, invalid key lengths, symlink or nonregular objects, invalid signatures, or a missing trusted signer when strict trust is required.
+Verification fails for unknown, duplicate, or trailing manifest fields; malformed envelopes; unsupported schemas or algorithms; changed capsule IDs; invalid key fingerprints; invalid key lengths; symlink or nonregular objects; invalid signatures; or a missing trusted signer when strict trust is required.
 
 A valid trusted signature proves control of the signing private key for that capsule ID. It does not prove content safety, factual accuracy, license compliance, or the human identity behind the key.
 

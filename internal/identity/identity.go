@@ -12,6 +12,8 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+
+	"arkmesh/internal/strictjson"
 )
 
 const (
@@ -227,6 +229,9 @@ func writeJSON(path string, value any, permissions os.FileMode) error {
 }
 
 func decodeStrict(data []byte, value any) error {
+	if err := strictjson.RejectDuplicateKeys(bytes.NewReader(data)); err != nil {
+		return err
+	}
 	decoder := json.NewDecoder(bytes.NewReader(data))
 	decoder.DisallowUnknownFields()
 	if err := decoder.Decode(value); err != nil {

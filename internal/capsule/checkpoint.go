@@ -229,6 +229,9 @@ func checkpointJSON(checkpoint Checkpoint) ([]byte, error) {
 }
 
 func decodeCheckpoint(data []byte, checkpoint *Checkpoint) error {
+	if err := rejectDuplicateJSONKeys(data); err != nil {
+		return err
+	}
 	decoder := json.NewDecoder(bytes.NewReader(data))
 	decoder.DisallowUnknownFields()
 	if err := decoder.Decode(checkpoint); err != nil {
