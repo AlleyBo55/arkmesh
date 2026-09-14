@@ -95,12 +95,22 @@ func Pack(name, outputDir string, sources []AssetSource, now time.Time) (Manifes
 }
 
 func Load(root string) (Manifest, error) {
-	data, err := os.ReadFile(filepath.Join(root, "manifest.json"))
+	file, err := os.Open(filepath.Join(root, "manifest.json"))
 	if err != nil {
 		return Manifest{}, fmt.Errorf("read manifest: %w", err)
 	}
+	defer file.Close()
+
+	decoder := json.NewDecoder(file)
+	decoder.DisallowUnknownFields()
 	var manifest Manifest
-	if err := json.Unmarshal(data, &manifest); err != nil {
+	if err := decoder.Decode(&manifest); err != nil {
+		return Manifest{}, fmt.Errorf("decode manifest: %w", err)
+	}
+	if err := decoder.Decode(&struct{}{}); !errors.Is(err, io.EOF) {
+		if err == nil {
+			return Manifest{}, errors.New("decode manifest: unexpected trailing JSON value")
+		}
 		return Manifest{}, fmt.Errorf("decode manifest: %w", err)
 	}
 	return manifest, nil
@@ -117,7 +127,7 @@ func Verify(root string) (Manifest, error) {
 
 	for _, asset := range manifest.Assets {
 		objectPath := filepath.Join(root, "objects", asset.SHA256)
-		info, err := os.Stat(objectPath)
+		info, err := os.Lstat(objectPath)
 		if err != nil {
 			return Manifest{}, fmt.Errorf("asset %q (%s): %w", asset.Name, asset.Role, err)
 		}

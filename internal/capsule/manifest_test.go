@@ -141,3 +141,48 @@ func writeFixture(t *testing.T, root, name, content string) string {
 	}
 	return path
 }
+
+func TestVerifyRejectsUnknownManifestField(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	model := writeFixture(t, root, "tiny.gguf", "model")
+	output := filepath.Join(root, "demo.ark")
+	if _, err := Pack("demo", output, []AssetSource{{Role: "model", Path: model}}, time.Now()); err != nil {
+		t.Fatalf("Pack() error = %v", err)
+	}
+
+	manifestPath := filepath.Join(output, "manifest.json")
+	data, err := os.ReadFile(manifestPath)
+	if err != nil {
+		t.Fatalf("read manifest: %v", err)
+	}
+	changed := strings.Replace(string(data), "{\n", "{\n  \"unexpected\": true,\n", 1)
+	if err := os.WriteFile(manifestPath, []byte(changed), 0o644); err != nil {
+		t.Fatalf("rewrite manifest: %v", err)
+	}
+	if _, err := Verify(output); err == nil || !strings.Contains(err.Error(), "unknown field") {
+		t.Fatalf("Verify() error = %v, want unknown field", err)
+	}
+}
+
+func TestVerifyRejectsSymlinkObject(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	model := writeFixture(t, root, "tiny.gguf", "model")
+	output := filepath.Join(root, "demo.ark")
+	manifest, err := Pack("demo", output, []AssetSource{{Role: "model", Path: model}}, time.Now())
+	if err != nil {
+		t.Fatalf("Pack() error = %v", err)
+	}
+
+	objectPath := filepath.Join(output, "objects", manifest.Assets[0].SHA256)
+	if err := os.Remove(objectPath); err != nil {
+		t.Fatalf("remove packed object: %v", err)
+	}
+	if err := os.Symlink(model, objectPath); err != nil {
+		t.Fatalf("create object symlink: %v", err)
+	}
+	if _, err := Verify(output); err == nil || !strings.Contains(err.Error(), "not a regular file") {
+		t.Fatalf("Verify() error = %v, want non-regular object", err)
+	}
+}
