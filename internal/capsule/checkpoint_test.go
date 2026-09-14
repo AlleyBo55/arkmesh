@@ -111,6 +111,25 @@ func TestAdvanceCheckpointRejectsParentThatIsNotCurrentHead(t *testing.T) {
 	}
 }
 
+func TestAdvanceCheckpointRejectsConcurrentWriter(t *testing.T) {
+	t.Parallel()
+	fixture := rotationFixture(t)
+	path := filepath.Join(t.TempDir(), "checkpoint.json")
+	checkpoint, err := NewCheckpoint(fixture.parent, fixture.parentAuth)
+	if err != nil {
+		t.Fatalf("NewCheckpoint() error = %v", err)
+	}
+	if err := WriteCheckpoint(path, checkpoint); err != nil {
+		t.Fatalf("WriteCheckpoint() error = %v", err)
+	}
+	if err := os.WriteFile(path+".lock", nil, 0o600); err != nil {
+		t.Fatalf("create checkpoint lock: %v", err)
+	}
+	if _, _, err := AdvanceCheckpointFile(path, fixture.childRoot, fixture.parent, fixture.parentAuth, fixture.child, fixture.childAuth); err == nil || !strings.Contains(err.Error(), "locked by another advancement") {
+		t.Fatalf("AdvanceCheckpointFile() error = %v, want lock rejection", err)
+	}
+}
+
 func TestLoadCheckpointRejectsUnknownField(t *testing.T) {
 	t.Parallel()
 	path := filepath.Join(t.TempDir(), "checkpoint.json")

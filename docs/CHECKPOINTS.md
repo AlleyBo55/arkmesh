@@ -57,7 +57,7 @@ ArkMesh verifies both signatures and then accepts one of two lineage edges:
 1. Parent and child have the same signer.
 2. The parent signer authorized the child's exact new signer through `authority.json`.
 
-The checkpoint file is replaced only after those checks pass. The new head records the child capsule ID and child signer ID. The old capsule remains valid historical data, but it no longer matches the local checkpoint.
+The checkpoint file is replaced only after those checks pass. Concurrent advancement is refused through a local `.lock` file so two branches cannot silently use last-writer behavior. If a process is interrupted and leaves that file behind, the operator must inspect the checkpoint state before removing the stale lock. The new head records the child capsule ID and child signer ID. The old capsule remains valid historical data, but it no longer matches the local checkpoint.
 
 Local revocation policies apply during creation, verification, and advancement. A revoked parent cannot authorize advancement, and a revoked current signer cannot satisfy the checkpoint.
 

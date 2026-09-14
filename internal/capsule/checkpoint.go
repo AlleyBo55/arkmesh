@@ -143,6 +143,20 @@ func (checkpoint Checkpoint) Validate() error {
 }
 
 func replaceCheckpoint(path string, expected, next Checkpoint) error {
+	lockPath := path + ".lock"
+	lock, err := os.OpenFile(lockPath, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0o600)
+	if err != nil {
+		if errors.Is(err, os.ErrExist) {
+			return errors.New("checkpoint is locked by another advancement")
+		}
+		return fmt.Errorf("create checkpoint lock: %w", err)
+	}
+	if err := lock.Close(); err != nil {
+		_ = os.Remove(lockPath)
+		return fmt.Errorf("close checkpoint lock: %w", err)
+	}
+	defer os.Remove(lockPath)
+
 	data, err := checkpointJSON(next)
 	if err != nil {
 		return err
