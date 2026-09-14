@@ -1,6 +1,8 @@
 # ArkMesh web interface
 
-A command-first landing page and system wiki for the ArkMesh research prototype.
+A command-first landing page and system wiki for ArkMesh, an open-source foundation project researching how useful open AI can survive outages, withdrawn hosts, and infrastructure failure through verifiable, consent-based peer preservation.
+
+This is not a SaaS interface. The landing page leads with the public research question, distinguishes the planned peer network from current local evidence, and invites collaboration across distributed systems, cryptography, local AI runtimes, and digital preservation.
 
 ## Requirements
 
@@ -63,3 +65,13 @@ A visible roadmap card is not an implementation claim. The status comes from the
 - ESLint 9, the newest release currently supported by every plugin bundled with the Next.js configuration
 
 The old blue-screen visual system uses local system monospace fonts, CSS scanlines, square frames, and no remote runtime assets.
+
+## Deployment metadata
+
+Set the real public origin before a production deployment:
+
+```bash
+cp .env.example .env.local
+```
+
+Replace `https://example.com` with the deployed origin. `NEXT_PUBLIC_SITE_URL` controls canonical metadata and sitemap URLs. Do not deploy with the example value.

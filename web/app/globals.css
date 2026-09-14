@@ -57,10 +57,6 @@ body::before {
   background: var(--cyan);
 }
 
-a {
-  color: inherit;
-}
-
 .screen-shell {
   position: relative;
   min-height: 100vh;
@@ -148,6 +144,16 @@ a {
 }
 
 .status-pulse {
+  color: #00104f;
+}
+
+.status-pulse::before {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 6px;
+  content: "";
+  background: #00104f;
   animation: blink 1.2s steps(2, end) infinite;
 }
 
@@ -297,5 +303,408 @@ a {
 
   .metric-cell:last-child {
     border-bottom: 0;
+  }
+}
+
+/* Landing-page continuity simulation */
+.simulator {
+  overflow: hidden;
+  border: 2px solid var(--line);
+  background: #00093d;
+  box-shadow: 12px 12px 0 var(--shadow), inset 0 0 60px rgba(34, 126, 255, 0.12);
+}
+
+.sim-pause {
+  min-width: 68px;
+  min-height: 30px;
+  border: 2px solid #00104f;
+  color: #00104f;
+  background: transparent;
+  font: inherit;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.sim-pause:hover,
+.sim-pause:focus-visible {
+  color: white;
+  background: #00104f;
+  outline: 2px solid white;
+  outline-offset: 2px;
+}
+
+.sim-body {
+  padding: clamp(14px, 3vw, 32px);
+}
+
+.sim-readout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(240px, 0.85fr);
+  gap: 28px;
+  align-items: end;
+  min-height: 118px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.sim-layout {
+  display: grid;
+  grid-template-columns: minmax(140px, 0.78fr) minmax(42px, 0.28fr) minmax(250px, 1.35fr) minmax(42px, 0.28fr) minmax(140px, 0.78fr);
+  gap: clamp(8px, 1.5vw, 18px);
+  align-items: center;
+  padding-block: clamp(24px, 5vw, 52px);
+}
+
+.sim-node,
+.shard-bank {
+  min-width: 0;
+  border: 1px solid var(--line-soft);
+  background: #00105a;
+  box-shadow: inset 0 0 24px rgba(34, 126, 255, 0.14);
+}
+
+.sim-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 220px;
+  padding: 12px;
+  text-align: center;
+  transition: border-color 180ms ease, background-color 180ms ease, opacity 180ms ease;
+}
+
+.sim-node-head {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--muted);
+  font-size: 0.65rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.sim-node strong {
+  color: white;
+  font-size: 0.82rem;
+  letter-spacing: 0.08em;
+}
+
+.sim-node small {
+  color: var(--muted);
+  font-size: 0.64rem;
+  text-transform: uppercase;
+}
+
+.sim-node.is-lost {
+  border-color: rgba(255, 209, 102, 0.62);
+  background: #2c174f;
+  opacity: 0.72;
+}
+
+.sim-node.is-lost strong {
+  color: var(--amber);
+}
+
+.sim-target.is-building {
+  border-color: var(--cyan);
+  background: #001d79;
+}
+
+.sim-target.is-verified {
+  border-color: var(--green);
+  background: #003064;
+  box-shadow: inset 0 0 30px rgba(101, 245, 170, 0.15), 0 0 24px rgba(101, 245, 170, 0.1);
+}
+
+.sim-target.is-verified strong {
+  color: var(--green);
+}
+
+.capsule-glyph {
+  display: grid;
+  grid-template-columns: repeat(3, 20px);
+  gap: 5px;
+  padding: 17px;
+  border: 2px solid var(--cyan);
+  background: #000a3c;
+  box-shadow: 5px 5px 0 rgba(101, 241, 255, 0.18);
+}
+
+.capsule-glyph span {
+  width: 20px;
+  height: 20px;
+  border: 1px solid var(--line);
+  background: var(--panel-bright);
+}
+
+.sim-node.is-lost .capsule-glyph {
+  border-color: var(--amber);
+  filter: grayscale(0.72);
+}
+
+.shard-bank {
+  padding: 12px;
+}
+
+.shard-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.shard-cell {
+  display: flex;
+  min-height: 74px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line-soft);
+  color: white;
+  background: #001a72;
+  transition: border-color 180ms ease, background-color 180ms ease, opacity 180ms ease;
+}
+
+.shard-cell span {
+  font-size: 0.82rem;
+  font-weight: 900;
+}
+
+.shard-cell small {
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 0.58rem;
+}
+
+.shard-cell.is-lost {
+  border-color: rgba(255, 209, 102, 0.6);
+  color: var(--amber);
+  background: repeating-linear-gradient(135deg, #24194f 0, #24194f 6px, #321b54 6px, #321b54 12px);
+  opacity: 0.64;
+}
+
+.shard-cell.is-active {
+  border-color: var(--cyan);
+  color: var(--cyan);
+  background: #00318f;
+  box-shadow: inset 0 0 16px rgba(101, 241, 255, 0.22);
+}
+
+.transfer-bus {
+  display: grid;
+  gap: 7px;
+  align-content: center;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.transfer-bus span {
+  display: block;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, transparent 0 12%, var(--line-soft) 12% 70%, transparent 70% 100%);
+  background-size: 200% 100%;
+  opacity: 0.34;
+}
+
+.transfer-bus.is-flowing span {
+  opacity: 1;
+  animation: data-flow 900ms linear infinite;
+  background-image: linear-gradient(90deg, transparent 0 20%, var(--cyan) 35% 52%, transparent 67% 100%);
+}
+
+.transfer-bus.is-flowing span:nth-child(2) { animation-delay: 140ms; }
+.transfer-bus.is-flowing span:nth-child(3) { animation-delay: 280ms; }
+.transfer-bus.is-flowing span:nth-child(4) { animation-delay: 420ms; }
+
+.verify-glyph {
+  position: relative;
+  display: grid;
+  width: 84px;
+  height: 84px;
+  place-items: center;
+}
+
+.verify-ring {
+  position: absolute;
+  inset: 0;
+  border: 2px dashed var(--line);
+  border-radius: 50%;
+  animation: ring-turn 7s linear infinite;
+}
+
+.verify-mark {
+  position: relative;
+  color: var(--cyan);
+  font-size: 1.1rem;
+  font-weight: 950;
+}
+
+.sim-target.is-verified .verify-ring {
+  border-color: var(--green);
+  border-style: solid;
+}
+
+.sim-target.is-verified .verify-mark {
+  color: var(--green);
+  font-size: 2rem;
+}
+
+.sim-output {
+  overflow-wrap: anywhere;
+  padding: 13px 15px;
+  border: 1px solid var(--line-soft);
+  color: white;
+  background: #00062e;
+  font-size: 0.72rem;
+  line-height: 1.6;
+}
+
+.sim-output span {
+  color: var(--cyan);
+  font-weight: 900;
+}
+
+.sim-controls {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1px;
+  margin-top: 12px;
+  border: 1px solid var(--line-soft);
+  background: var(--line-soft);
+}
+
+.sim-controls button {
+  display: flex;
+  min-width: 0;
+  min-height: 48px;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  border: 0;
+  color: var(--muted);
+  background: #001052;
+  font: inherit;
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.sim-controls button span {
+  color: var(--cyan);
+}
+
+.sim-controls button:hover,
+.sim-controls button:focus-visible,
+.sim-controls button.is-current {
+  color: #00104f;
+  background: var(--cyan);
+  outline: none;
+}
+
+.sim-controls button:hover span,
+.sim-controls button:focus-visible span,
+.sim-controls button.is-current span {
+  color: #00104f;
+}
+
+@keyframes data-flow {
+  to { background-position: -200% 0; }
+}
+
+@keyframes ring-turn {
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 1023px) {
+  .sim-readout {
+    grid-template-columns: 1fr;
+    min-height: 0;
+  }
+
+  .sim-layout {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .sim-node {
+    min-height: 188px;
+  }
+
+  .transfer-bus {
+    grid-template-columns: repeat(4, 3px);
+    justify-content: center;
+    min-height: 46px;
+  }
+
+  .transfer-bus span {
+    width: 3px;
+    height: 46px;
+    background: linear-gradient(180deg, transparent 0 12%, var(--line-soft) 12% 70%, transparent 70% 100%);
+    background-size: 100% 200%;
+  }
+
+  .transfer-bus.is-flowing span {
+    background-image: linear-gradient(180deg, transparent 0 20%, var(--cyan) 35% 52%, transparent 67% 100%);
+    animation-name: data-flow-vertical;
+  }
+}
+
+@media (max-width: 640px) {
+  .simulator {
+    box-shadow: 5px 5px 0 var(--shadow);
+  }
+
+  .sim-body {
+    padding: 12px;
+  }
+
+  .sim-readout {
+    gap: 14px;
+    padding-bottom: 18px;
+  }
+
+  .shard-grid {
+    gap: 6px;
+  }
+
+  .shard-cell {
+    min-height: 64px;
+  }
+
+  .sim-controls {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .terminal-titlebar {
+    gap: 8px;
+    font-size: 0.66rem;
+    letter-spacing: 0.04em;
+  }
+
+  .big-type {
+    font-size: clamp(2.45rem, 14vw, 4.5rem);
+    letter-spacing: -0.075em;
+  }
+
+  .section-kicker {
+    align-items: flex-start;
+    letter-spacing: 0.1em;
+  }
+}
+
+@keyframes data-flow-vertical {
+  to { background-position: 0 -200%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .transfer-bus.is-flowing span,
+  .verify-ring {
+    animation: none;
   }
 }

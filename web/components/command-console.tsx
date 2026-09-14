@@ -257,7 +257,7 @@ export function CommandConsole({ compact = false }: { compact?: boolean }) {
     <section className="terminal-frame" aria-label="ArkMesh command console">
       <div className="terminal-titlebar">
         <span>ARKMESH://{pathname === "/wiki" ? "WIKI" : "ROOT"}</span>
-        <span className="hidden text-blue-200 sm:inline">TTY-01 · LOCAL ONLY</span>
+        <span className="hidden text-[#00104f] sm:inline">TTY-01 · LOCAL ONLY</span>
         <span className="status-pulse">READY</span>
       </div>
       <div

@@ -126,10 +126,10 @@ export const wikiSections: WikiSection[] = [
     id: "overview",
     index: "00",
     title: "System overview",
-    lead: "ArkMesh preserves verifiable AI capability bundles when the original host and central network are unavailable.",
+    lead: "What happens to useful open AI when the internet, original publisher, or hosting organization disappears?",
     paragraphs: [
-      "A capsule can contain model weights, tokenizer data, configuration, runtime requirements, knowledge, licenses, and recovery instructions. The signed manifest commits to every asset and its authenticated chunk tree.",
-      "The current alpha proves local integrity, authority, repair, donorless reconstruction, and sampled retrievability. Networking and inference remain planned and are never presented as completed behavior.",
+      "ArkMesh is an open-source foundation project exploring whether consenting peers can preserve complete, verifiable AI capabilities without one provider, central tracker, or machine. A capsule can contain model weights, tokenizer data, configuration, runtime requirements, knowledge, licenses, and recovery instructions.",
+      "The current alpha proves local integrity, authority, repair, donorless reconstruction, and sampled retrievability. Peer discovery, encrypted transfer, automated placement, and inference remain planned and are never presented as completed behavior.",
     ],
     commands: ["status", "evidence", "roadmap"],
   },

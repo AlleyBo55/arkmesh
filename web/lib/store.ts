@@ -19,8 +19,8 @@ const initialState: TerminalState = {
     {
       id: "boot-0",
       lines: [
-        "ARKMESH RECOVERY CONSOLE v0.1.0-alpha.1",
-        "LOCAL EVIDENCE CHANNEL READY",
+        "ARKMESH CONSOLE v0.1.0-alpha.1",
+        "OPEN-SOURCE RESEARCH CHANNEL READY",
         "Type HELP or select a command. No capability is simulated as complete.",
       ],
       tone: "system",
