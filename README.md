@@ -36,8 +36,10 @@ Read [The ArkMesh Promise](MANIFESTO.md) for the longer motivation and the proje
 - Verify same-author update authority across a parent and child
 - Authorize one exact child key through a parent-signed rotation transition
 - Apply explicit local revocation policies during offline verification
+- Pin one accepted lineage head in a local checkpoint
+- Advance a checkpoint through one verified direct lineage edge
 - Inspect a capsule manifest
-- Detect missing files, changed content, invalid signatures, wrong parents, reused transitions, revoked signers, and unauthorized child keys
+- Detect missing files, changed content, invalid signatures, wrong parents, reused transitions, revoked signers, unauthorized child keys, and rollback against a retained checkpoint
 
 ### Not built yet
 
@@ -46,7 +48,7 @@ Read [The ArkMesh Promise](MANIFESTO.md) for the longer motivation and the proje
 - Peer discovery and encrypted transfer
 - Resumable chunk exchange
 - Local model inference
-- Divergent branch reconciliation
+- Replay agreement across peers and divergent branch reconciliation
 - Erasure coding
 - Recovery dashboard
 
@@ -113,7 +115,7 @@ go test ./...
 go build ./cmd/arkmesh
 ```
 
-The help command documents identity, pack, inspect, and verify syntax.
+The help command documents identity, checkpoint, pack, inspect, and verify syntax.
 
 A signed capsule contains:
 
@@ -143,7 +145,7 @@ The implementation currently uses only the Go standard library.
 2. **Authenticity:** identities, signatures, explicit local trust, planned key rotation, and local revocation are implemented. Emergency recovery authority and shared revocation distribution remain open.
 3. **Replication:** encrypted LAN discovery and resumable transfer between invited peers.
 4. **Execution:** llama.cpp integration and local inference health checks.
-5. **Continuity:** same-author parentage and exact rotation edges are implemented. Divergent descendants, partition recovery, and deliberate reconciliation remain open.
+5. **Continuity:** same-author parentage, exact rotation edges, and local head checkpoints are implemented. Divergent descendants, partition recovery, and deliberate reconciliation remain open.
 6. **Resilience:** erasure coding, repair, varied hardware, and offline media.
 7. **Evidence:** simulated and physical failure tests against simpler baselines.
 
@@ -170,6 +172,7 @@ Read the full [threat model](docs/THREAT_MODEL.md).
 - [Threat Model](docs/THREAT_MODEL.md): assets, trust boundaries, attacks, and propagation limits
 - [Capsule Protocol](docs/PROTOCOL.md): current capsule, signature, and lineage format
 - [Key Authority and Revocation](docs/AUTHORITY.md): exact planned rotations and local rejection policy
+- [Local Lineage Checkpoints](docs/CHECKPOINTS.md): accepted heads, direct advancement, and rollback limits
 - [Experiment Plan](docs/EXPERIMENTS.md): metrics, baselines, partition tests, and recovery rehearsal
 - [GitHub Setup](.github/REPOSITORY_METADATA.md): repository description, topics, and issue labels
 

@@ -40,6 +40,8 @@ func run(args []string, stdout, stderr io.Writer) int {
 	switch args[0] {
 	case "identity":
 		err = runIdentity(args[1:], stdout, stderr)
+	case "checkpoint":
+		err = runCheckpoint(args[1:], stdout, stderr)
 	case "pack":
 		err = runPack(args[1:], stdout, stderr)
 	case "inspect":
@@ -260,6 +262,7 @@ func runVerify(args []string, stdout, stderr io.Writer) error {
 	var revocationPaths repeatedFlags
 	flags.Var(&revocationPaths, "revocations", "local revocation policy file (repeatable)")
 	parentPath := flags.String("parent", "", "parent capsule directory used to verify ancestry")
+	checkpointPath := flags.String("checkpoint", "", "local checkpoint that must match this capsule")
 	requireSignature := flags.Bool("require-signature", false, "reject unsigned capsules")
 	requireTrusted := flags.Bool("require-trusted", false, "reject capsules without a trusted root or parent")
 	requireLineage := flags.Bool("require-lineage", false, "reject descendants whose parent was not checked")
@@ -270,35 +273,36 @@ func runVerify(args []string, stdout, stderr io.Writer) error {
 		return errors.New("usage: arkmesh verify [flags] <capsule-directory>")
 	}
 
-	trusted := make([]identity.PublicIdentity, 0, len(trustPaths))
-	for _, path := range trustPaths {
-		public, err := identity.LoadPublic(path)
-		if err != nil {
-			return fmt.Errorf("load trusted identity %q: %w", path, err)
-		}
-		trusted = append(trusted, public)
+	trusted, err := loadTrustedIdentities(trustPaths)
+	if err != nil {
+		return err
 	}
-	revocationSets := make([]identity.RevocationSet, 0, len(revocationPaths))
-	for _, path := range revocationPaths {
-		set, err := identity.LoadRevocationSet(path)
-		if err != nil {
-			return fmt.Errorf("load revocation policy %q: %w", path, err)
-		}
-		revocationSets = append(revocationSets, set)
-	}
-	revocations, err := identity.MergeRevocationSets(revocationSets...)
+	revocations, err := loadRevocations(revocationPaths)
 	if err != nil {
 		return err
 	}
 
+	checkpointSupplied := strings.TrimSpace(*checkpointPath) != ""
 	childOptions := capsule.VerifyOptions{
 		Trusted:          trusted,
 		Revocations:      revocations,
-		RequireSignature: *requireSignature || *requireTrusted,
+		RequireSignature: *requireSignature || *requireTrusted || checkpointSupplied,
 	}
 	manifest, authenticity, err := capsule.VerifyAuthenticated(flags.Arg(0), childOptions)
 	if err != nil {
 		return err
+	}
+
+	checkpointMatched := false
+	if checkpointSupplied {
+		checkpoint, err := capsule.LoadCheckpoint(*checkpointPath)
+		if err != nil {
+			return err
+		}
+		if err := capsule.VerifyCheckpoint(checkpoint, manifest, authenticity); err != nil {
+			return err
+		}
+		checkpointMatched = true
 	}
 
 	lineage := capsule.DescribeLineage(manifest)
@@ -307,14 +311,14 @@ func runVerify(args []string, stdout, stderr io.Writer) error {
 		if parentSupplied {
 			return errors.New("root capsule does not declare a parent")
 		}
-		if *requireTrusted && authenticity.Status != capsule.AuthenticityTrusted {
+		if *requireTrusted && authenticity.Status != capsule.AuthenticityTrusted && !checkpointMatched {
 			return fmt.Errorf("capsule signer %s is not trusted", authenticity.SignerID)
 		}
 	} else if !parentSupplied {
 		if *requireLineage {
 			return fmt.Errorf("capsule declares parent %s but no --parent was supplied", manifest.ParentCapsuleID)
 		}
-		if *requireTrusted && authenticity.Status != capsule.AuthenticityTrusted {
+		if *requireTrusted && authenticity.Status != capsule.AuthenticityTrusted && !checkpointMatched {
 			return fmt.Errorf("capsule signer %s is not trusted", authenticity.SignerID)
 		}
 	} else {
@@ -322,7 +326,7 @@ func runVerify(args []string, stdout, stderr io.Writer) error {
 			Trusted:          trusted,
 			Revocations:      revocations,
 			RequireSignature: true,
-			RequireTrusted:   *requireTrusted,
+			RequireTrusted:   *requireTrusted && !checkpointMatched,
 		}
 		parentManifest, parentAuthenticity, err := capsule.VerifyAuthenticated(*parentPath, parentOptions)
 		if err != nil {
@@ -338,6 +342,9 @@ func runVerify(args []string, stdout, stderr io.Writer) error {
 	if authenticity.SignerID != "" {
 		fmt.Fprintf(stdout, "signer: %s\n", authenticity.SignerID)
 	}
+	if checkpointMatched {
+		fmt.Fprintln(stdout, "checkpoint: matched")
+	}
 	if lineage.ParentCapsuleID != "" {
 		fmt.Fprintf(stdout, "parent: %s\n", lineage.ParentCapsuleID)
 	}
@@ -351,9 +358,12 @@ Usage:
   arkmesh identity create --out DIR
   arkmesh identity show PUBLIC_IDENTITY
   arkmesh identity revoke --identity PUBLIC_IDENTITY [--identity ...] --out FILE
+  arkmesh checkpoint create --out FILE --trust PUBLIC_IDENTITY [--revocations FILE] CAPSULE
+  arkmesh checkpoint show FILE
+  arkmesh checkpoint advance --checkpoint FILE --parent PARENT_CAPSULE [--revocations FILE] CHILD_CAPSULE
   arkmesh pack --name NAME --out DIR --asset role=/path/to/file [--asset ...] [--signing-key PRIVATE_IDENTITY] [--parent PARENT_CAPSULE] [--rotation-key PARENT_PRIVATE_IDENTITY]
   arkmesh inspect DIR
-  arkmesh verify [--trust PUBLIC_IDENTITY] [--revocations FILE] [--require-signature] [--require-trusted] [--parent PARENT_CAPSULE] [--require-lineage] DIR
+  arkmesh verify [--trust PUBLIC_IDENTITY] [--revocations FILE] [--checkpoint FILE] [--require-signature] [--require-trusted] [--parent PARENT_CAPSULE] [--require-lineage] DIR
 
-Integrity verification remains available for unsigned capsules. Parent-signed transitions authorize exact key rotations. Local revocation policy overrides trust.`)
+Integrity verification remains available for unsigned capsules. Parent-signed transitions authorize exact key rotations. Local checkpoints reject rollback to another capsule head. Local revocation policy overrides trust.`)
 }
