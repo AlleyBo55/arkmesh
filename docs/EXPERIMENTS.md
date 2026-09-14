@@ -24,17 +24,22 @@ ArkMesh is useful only if it improves measured executable continuity or provenan
 
 A more complex ArkMesh mechanism should be rejected when a simpler baseline performs equivalently for the target scenario.
 
-## E0: Local integrity
+## E0: Local integrity and authenticity
 
-Status: scaffold target.
+Status: implemented in the reference CLI and automated tests.
 
 1. Pack two small fixture assets.
-2. Verify the capsule successfully.
-3. Modify one stored object.
-4. Confirm verification fails with the affected asset identified.
-5. Remove one object and confirm verification fails.
+2. Verify the intact capsule successfully.
+3. Modify one stored object and confirm verification fails.
+4. Remove one object and confirm verification fails.
+5. Create an Ed25519 author identity and sign a fresh capsule.
+6. Verify it with the matching public identity and require trusted status.
+7. Verify it without a trust input and confirm valid unknown author status.
+8. Replace the signature bytes and confirm verification fails.
+9. Require a different trusted identity and confirm verification fails.
+10. Verify an existing unsigned capsule without strict signature requirements.
 
-Pass condition: all intact assets verify; every tested modification or deletion is detected.
+Pass condition: intact objects and valid signatures verify, tested modifications are detected, trust is never inferred from an embedded public key, and unsigned compatibility remains explicit.
 
 ## E1: Three-node LAN continuity
 

@@ -29,13 +29,15 @@ Read [The ArkMesh Promise](MANIFESTO.md) for the longer motivation and the proje
 - Pack local files into a content addressed capsule
 - Record SHA-256 hashes, roles, file names, and sizes
 - Derive a deterministic capsule ID
+- Create local Ed25519 author identities
+- Sign capsules without placing private keys inside them
+- Verify trusted, unknown, invalid, and unsigned capsule states offline
 - Inspect a capsule manifest
-- Verify every stored object
-- Detect missing files, changed content, manifest edits, and invalid roles
+- Detect missing files, changed content, manifest edits, invalid roles, and invalid signatures
 
 ### Not built yet
 
-- Author identities and Ed25519 signatures
+- Key revocation and rotation
 - Peer discovery and encrypted transfer
 - Resumable chunk exchange
 - Local model inference
@@ -43,7 +45,7 @@ Read [The ArkMesh Promise](MANIFESTO.md) for the longer motivation and the proje
 - Erasure coding
 - Recovery dashboard
 
-The current format proves internal consistency. It does not prove who created a capsule or whether its contents are safe. Do not accept a v0alpha1 capsule from an untrusted source.
+A valid signature proves that the holder of a specific private key signed the capsule ID. It does not prove the author's legal identity, the truth of the contents, license compliance, or safety. Trust is imported explicitly by each operator.
 
 ## The planned experiment
 
@@ -106,19 +108,20 @@ go test ./...
 go build ./cmd/arkmesh
 ```
 
-The help command documents the current pack, inspect, and verify syntax.
+The help command documents identity, pack, inspect, and verify syntax.
 
-A capsule currently looks like this:
+A signed capsule contains:
 
 ```text
 field-assistant.ark/
 ├── manifest.json
+├── signature.json
 └── objects/
     ├── <sha256>
     └── <sha256>
 ```
 
-Object paths come only from validated content hashes. Human supplied names and roles remain metadata.
+Unsigned capsules remain supported for local integrity checks. Object paths come only from validated content hashes. Human supplied names and roles remain metadata.
 
 ## Build and test
 
@@ -131,8 +134,8 @@ The implementation currently uses only the Go standard library.
 
 ## Research roadmap
 
-1. **Integrity:** deterministic manifests and tamper detection. This is the current stage.
-2. **Authenticity:** signed manifests, author identities, trust roots, and revocation.
+1. **Integrity:** deterministic manifests and tamper detection are implemented.
+2. **Authenticity:** identities, signatures, and explicit local trust are implemented. Revocation and rotation remain open.
 3. **Replication:** encrypted LAN discovery and resumable transfer between invited peers.
 4. **Execution:** llama.cpp integration and local inference health checks.
 5. **Continuity:** parentage, divergent descendants, partition recovery, and deliberate reconciliation.

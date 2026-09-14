@@ -1,20 +1,21 @@
 # Capsule Protocol
 
-Status: **v0alpha1, unstable, unsigned**
+Status: **v0alpha1, unstable, optional signatures implemented**
 
-This document describes the implemented on-disk capsule envelope and records invariants for later peer replication. It is not yet a stable public protocol.
+This document describes the implemented on disk capsule envelope. It is not yet a stable public protocol.
 
 ## Directory layout
 
 ```text
 <capsule>/
 ├── manifest.json
+├── signature.json
 └── objects/
     ├── <lowercase sha256>
     └── ...
 ```
 
-Object paths are derived only from validated lowercase SHA-256 digests. Human-provided file names are display metadata and never become storage paths.
+`signature.json` is optional so existing unsigned capsules remain valid for local integrity checks. Object paths are derived only from validated lowercase SHA-256 digests. Human provided file names are display metadata and never become storage paths.
 
 ## Manifest
 
@@ -35,57 +36,106 @@ Object paths are derived only from validated lowercase SHA-256 digests. Human-pr
 }
 ```
 
-The capsule ID is SHA-256 over the compact JSON representation of the manifest with `capsule_id` set to an empty string. Struct field order is fixed by the reference implementation for v0alpha1. This derivation is experimental and will be replaced or formally canonicalized before interoperability is promised.
+The capsule ID is SHA-256 over the compact JSON representation of the manifest with `capsule_id` set to an empty string. Struct field order is fixed by the reference implementation for v0alpha1. This derivation remains experimental until an interoperability review formalizes canonical serialization.
 
 ## Asset roles
 
-Roles are currently free-form lowercase identifiers supplied by the packer. Initial conventions:
+Roles are lowercase identifiers supplied by the packer. Initial conventions:
 
 - `model`: model weights
 - `runtime`: executable runtime or source bundle
 - `tokenizer`: tokenizer files
-- `config`: model/runtime configuration
+- `config`: model or runtime configuration
 - `knowledge`: intentionally shared reference material
-- `policy`: human-readable or machine-readable operating policy
+- `policy`: human readable or machine readable operating policy
 - `license`: license and redistribution records
 - `recovery`: offline operating and repair instructions
 
-A role describes purpose; it grants no permission and does not make content safe to execute.
+A role describes purpose. It grants no permission and does not make content safe to execute.
 
-## Verification
+## Author identity
 
-A verifier must reject a capsule when:
+ArkMesh creates an Ed25519 key pair in a new owner controlled directory:
 
-- The schema version is unsupported.
-- The capsule ID does not match the manifest body.
-- The name or asset list is empty.
-- An asset role or display name is empty.
-- A digest is not exactly 64 lowercase hexadecimal characters.
-- An object is absent, not a regular file, has the wrong size, or has the wrong digest.
+```text
+<identity>/
+├── identity.json
+└── identity.key
+```
 
-Extra objects may exist but do not belong to the capsule unless listed in the manifest.
+`identity.json` is public and may be copied into a local trust store. `identity.key` contains the private key, is written with owner only file permissions, and must never enter a capsule or source repository.
 
-## Planned signed envelope
+The public identity format is:
 
-Peer replication must not ship until a later format defines:
+```json
+{
+  "schema_version": "arkmesh.identity/v0alpha1",
+  "algorithm": "ed25519",
+  "key_id": "ed25519:<sha256-of-public-key>",
+  "public_key": "<standard-base64>"
+}
+```
 
-- Ed25519 author and node identities
-- Signature scope and canonical serialization
+The key ID is a fingerprint, not a person's legal identity. Operators establish trust by obtaining and checking `identity.json` through a channel they consider appropriate.
+
+## Detached signature
+
+A signed capsule adds `signature.json`:
+
+```json
+{
+  "schema_version": "arkmesh.signature/v0alpha1",
+  "capsule_id": "sha256:<digest>",
+  "signer": {
+    "schema_version": "arkmesh.identity/v0alpha1",
+    "algorithm": "ed25519",
+    "key_id": "ed25519:<digest>",
+    "public_key": "<standard-base64>"
+  },
+  "signature": "<standard-base64>"
+}
+```
+
+Ed25519 signs these exact UTF-8 bytes:
+
+```text
+"arkmesh.capsule.signature/v0alpha1\n" + capsule_id + "\n"
+```
+
+The domain prefix prevents the signature from being reused as another message type. The capsule ID already binds the complete manifest, and each listed object is bound by its digest and size.
+
+## Verification states
+
+After object and manifest integrity checks, verification reports one of three successful states:
+
+- `unsigned`: no signature exists and strict signature checks were not requested
+- `valid_unknown_author`: the signature is valid, but the signer is absent from the supplied trust set
+- `valid_trusted_author`: the signature is valid and exactly matches a supplied public identity
+
+Verification fails for unknown or trailing manifest fields, malformed envelopes, unsupported schemas or algorithms, changed capsule IDs, invalid key fingerprints, invalid key lengths, symlink or nonregular objects, invalid signatures, or a missing trusted signer when strict trust is required.
+
+A valid trusted signature proves control of the signing private key for that capsule ID. It does not prove content safety, factual accuracy, license compliance, or the human identity behind the key.
+
+## Remaining authenticity work
+
+Peer replication must not ship until later work defines:
+
 - Parent capsule IDs and update authority
-- Trust-root import and invitation flow
-- Revocation and key-rotation semantics
+- Trust group invitation and import flow
+- Key revocation and rotation
+- Replay resistant version rules
 - License and provenance declarations
-- Runtime compatibility and health-check declarations
-- Chunking rules for resumable large-object transfer
+- Runtime compatibility and health checks
+- Chunking rules for resumable large object transfer
 
 ## Planned network behavior
 
-1. Device owner installs and starts a node locally.
-2. Owner imports a trust-group invitation.
+1. A device owner installs and starts a node locally.
+2. The owner imports a trust group invitation.
 3. Authenticated peers advertise capsule IDs and verified object availability.
-4. Receiver requests only missing chunks within configured quotas.
-5. Receiver verifies every chunk and complete object before storage.
-6. A capsule remains data until its manifest, author, policy, license, and runtime are approved.
+4. The receiver requests only missing chunks within configured quotas.
+5. The receiver verifies every chunk and complete object before storage.
+6. A capsule remains data until its author, policy, license, and runtime are approved.
 7. Execution occurs only through an allowlisted local runtime.
 
 No central tracker may be required for LAN operation. WAN discovery and relays, if added, must remain optional.

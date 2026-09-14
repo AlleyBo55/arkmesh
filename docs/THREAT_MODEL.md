@@ -64,7 +64,7 @@ Crossing this boundary would make the system worm-like and invalidate the projec
 
 ## v0alpha1 limitations
 
-The current scaffold verifies SHA-256 integrity only. It does not authenticate authors, encrypt transfers, execute models, or establish peer trust. A valid v0alpha1 manifest proves internal consistency, not safety, truth, license compliance, or trusted origin.
+The current implementation verifies SHA-256 object integrity and optional Ed25519 capsule signatures. Trust roots are supplied manually for each verification. It does not provide revocation, key rotation, encrypted transfer, peer authentication, model execution, or legal identity proof. A valid signature proves control of a private key for one capsule ID, not safety, truth, license compliance, or authorization to execute its contents.
 
 ## Out of scope
 
