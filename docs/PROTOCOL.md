@@ -19,12 +19,15 @@ This document describes the implemented on disk capsule envelope. It is not yet 
 
 ## Manifest
 
+A root capsule omits `parent_capsule_id`. A descendant includes the exact capsule ID of its parent:
+
 ```json
 {
   "schema_version": "arkmesh.capsule/v0alpha1",
   "capsule_id": "sha256:<digest>",
   "name": "field-assistant",
   "created_at": "2026-09-14T00:00:00Z",
+  "parent_capsule_id": "sha256:<parent-digest>",
   "assets": [
     {
       "role": "model",
@@ -36,7 +39,29 @@ This document describes the implemented on disk capsule envelope. It is not yet 
 }
 ```
 
-The capsule ID is SHA-256 over the compact JSON representation of the manifest with `capsule_id` set to an empty string. Struct field order is fixed by the reference implementation for v0alpha1. This derivation remains experimental until an interoperability review formalizes canonical serialization.
+The capsule ID is SHA-256 over the compact JSON representation of the manifest with `capsule_id` set to an empty string. `parent_capsule_id` is omitted from root JSON, which preserves existing root capsule IDs. For descendants, the parent ID is included in the digest and therefore covered by the capsule signature.
+
+Struct field order is fixed by the reference implementation for v0alpha1. This derivation remains experimental until an interoperability review formalizes canonical serialization.
+
+## Lineage and update authority
+
+The implemented rule is intentionally narrow:
+
+1. A root has no declared parent.
+2. A child names one parent capsule ID.
+3. The supplied parent must verify and match that exact ID.
+4. Parent and child must both have valid Ed25519 signatures.
+5. The child signer must equal the parent signer.
+
+Verification reports:
+
+- `root` when no parent is declared
+- `parent_not_checked` when a parent is declared but not supplied for verification
+- `verified_same_author` when parent identity, signatures, and signer continuity all pass
+
+Strict lineage mode rejects a descendant when its parent was not supplied. A mismatched parent, unsigned parent, unsigned child, or different child signer is rejected.
+
+This rule permits deliberate branches from one parent. It does not pick a winning branch or merge descendants. Key rotation and delegated update authority are not supported yet, so a new key cannot author an accepted child even if the operator believes it belongs to the same person.
 
 ## Asset roles
 
@@ -120,7 +145,7 @@ A valid trusted signature proves control of the signing private key for that cap
 
 Peer replication must not ship until later work defines:
 
-- Parent capsule IDs and update authority
+- Delegated update authority
 - Trust group invitation and import flow
 - Key revocation and rotation
 - Replay resistant version rules

@@ -24,7 +24,7 @@ ArkMesh is useful only if it improves measured executable continuity or provenan
 
 A more complex ArkMesh mechanism should be rejected when a simpler baseline performs equivalently for the target scenario.
 
-## E0: Local integrity and authenticity
+## E0: Local integrity, authenticity, and lineage
 
 Status: implemented in the reference CLI and automated tests.
 
@@ -38,8 +38,13 @@ Status: implemented in the reference CLI and automated tests.
 8. Replace the signature bytes and confirm verification fails.
 9. Require a different trusted identity and confirm verification fails.
 10. Verify an existing unsigned capsule without strict signature requirements.
+11. Create a signed child that includes the signed parent's capsule ID.
+12. Verify the parent and child with strict lineage enabled.
+13. Supply a different parent and confirm verification fails.
+14. Sign a child with another identity and confirm update authority fails.
+15. Remove the parent signature and confirm lineage verification fails.
 
-Pass condition: intact objects and valid signatures verify, tested modifications are detected, trust is never inferred from an embedded public key, and unsigned compatibility remains explicit.
+Pass condition: intact objects, valid signatures, and same-author ancestry verify. Tested modifications, wrong parents, and unauthorized descendants are rejected. Trust is never inferred from an embedded public key, and unsigned root compatibility remains explicit.
 
 ## E1: Three-node LAN continuity
 

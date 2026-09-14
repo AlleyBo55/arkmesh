@@ -35,20 +35,33 @@ type Asset struct {
 }
 
 type Manifest struct {
-	SchemaVersion string  `json:"schema_version"`
-	CapsuleID     string  `json:"capsule_id"`
-	Name          string  `json:"name"`
-	CreatedAt     string  `json:"created_at"`
-	Assets        []Asset `json:"assets"`
+	SchemaVersion   string  `json:"schema_version"`
+	CapsuleID       string  `json:"capsule_id"`
+	Name            string  `json:"name"`
+	CreatedAt       string  `json:"created_at"`
+	ParentCapsuleID string  `json:"parent_capsule_id,omitempty"`
+	Assets          []Asset `json:"assets"`
+}
+
+type PackOptions struct {
+	ParentCapsuleID string
 }
 
 func Pack(name, outputDir string, sources []AssetSource, now time.Time) (Manifest, error) {
+	return PackWithOptions(name, outputDir, sources, now, PackOptions{})
+}
+
+func PackWithOptions(name, outputDir string, sources []AssetSource, now time.Time, options PackOptions) (Manifest, error) {
 	name = strings.TrimSpace(name)
 	if name == "" {
 		return Manifest{}, errors.New("capsule name is required")
 	}
 	if len(sources) == 0 {
 		return Manifest{}, errors.New("at least one asset is required")
+	}
+	parentCapsuleID := strings.TrimSpace(options.ParentCapsuleID)
+	if parentCapsuleID != "" && !validCapsuleID(parentCapsuleID) {
+		return Manifest{}, fmt.Errorf("invalid parent capsule ID %q", options.ParentCapsuleID)
 	}
 	if _, err := os.Stat(filepath.Join(outputDir, "manifest.json")); err == nil {
 		return Manifest{}, fmt.Errorf("capsule already exists at %s", outputDir)
@@ -81,10 +94,11 @@ func Pack(name, outputDir string, sources []AssetSource, now time.Time) (Manifes
 	})
 
 	manifest := Manifest{
-		SchemaVersion: SchemaVersion,
-		Name:          name,
-		CreatedAt:     now.UTC().Format(time.RFC3339),
-		Assets:        assets,
+		SchemaVersion:   SchemaVersion,
+		Name:            name,
+		CreatedAt:       now.UTC().Format(time.RFC3339),
+		ParentCapsuleID: parentCapsuleID,
+		Assets:          assets,
 	}
 	manifest.CapsuleID = capsuleID(manifest)
 
@@ -149,6 +163,11 @@ func Verify(root string) (Manifest, error) {
 	return manifest, nil
 }
 
+func validCapsuleID(value string) bool {
+	algorithm, digest, found := strings.Cut(value, ":")
+	return found && algorithm == "sha256" && digestPattern.MatchString(digest)
+}
+
 func validateManifest(manifest Manifest) error {
 	if manifest.SchemaVersion != SchemaVersion {
 		return fmt.Errorf("unsupported schema version %q", manifest.SchemaVersion)
@@ -161,6 +180,9 @@ func validateManifest(manifest Manifest) error {
 	}
 	if len(manifest.Assets) == 0 {
 		return errors.New("manifest must contain at least one asset")
+	}
+	if manifest.ParentCapsuleID != "" && !validCapsuleID(manifest.ParentCapsuleID) {
+		return fmt.Errorf("invalid parent capsule ID %q", manifest.ParentCapsuleID)
 	}
 	if manifest.CapsuleID != capsuleID(manifest) {
 		return errors.New("capsule ID does not match manifest")

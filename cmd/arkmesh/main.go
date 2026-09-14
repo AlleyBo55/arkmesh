@@ -103,6 +103,7 @@ func runPack(args []string, stdout, stderr io.Writer) error {
 	name := flags.String("name", "", "human-readable capsule name")
 	output := flags.String("out", "", "output capsule directory")
 	signingKey := flags.String("signing-key", "", "private identity used to sign the capsule")
+	parentPath := flags.String("parent", "", "verified parent capsule directory")
 	var assets repeatedFlags
 	flags.Var(&assets, "asset", "asset as role=/path/to/file (repeatable)")
 	if err := flags.Parse(args); err != nil {
@@ -124,6 +125,25 @@ func runPack(args []string, stdout, stderr io.Writer) error {
 		signer = &loaded
 	}
 
+	parentCapsuleID := ""
+	if strings.TrimSpace(*parentPath) != "" {
+		if signer == nil {
+			return errors.New("--parent requires --signing-key")
+		}
+		parentManifest, parentAuthenticity, err := capsule.VerifyAuthenticated(*parentPath, capsule.VerifyOptions{RequireSignature: true})
+		if err != nil {
+			return fmt.Errorf("verify parent capsule: %w", err)
+		}
+		publicSigner, err := signer.Public()
+		if err != nil {
+			return fmt.Errorf("validate child signer: %w", err)
+		}
+		if parentAuthenticity.SignerID != publicSigner.KeyID {
+			return fmt.Errorf("child signer %s is not authorized by parent signer %s", publicSigner.KeyID, parentAuthenticity.SignerID)
+		}
+		parentCapsuleID = parentManifest.CapsuleID
+	}
+
 	sources := make([]capsule.AssetSource, 0, len(assets))
 	for _, value := range assets {
 		role, path, ok := strings.Cut(value, "=")
@@ -133,11 +153,16 @@ func runPack(args []string, stdout, stderr io.Writer) error {
 		sources = append(sources, capsule.AssetSource{Role: role, Path: path})
 	}
 
-	manifest, err := capsule.Pack(*name, *output, sources, time.Now())
+	manifest, err := capsule.PackWithOptions(*name, *output, sources, time.Now(), capsule.PackOptions{
+		ParentCapsuleID: parentCapsuleID,
+	})
 	if err != nil {
 		return err
 	}
 	fmt.Fprintf(stdout, "packed %s\nassets: %d\npath: %s\n", manifest.CapsuleID, len(manifest.Assets), *output)
+	if manifest.ParentCapsuleID != "" {
+		fmt.Fprintf(stdout, "parent: %s\n", manifest.ParentCapsuleID)
+	}
 	if signer != nil {
 		envelope, err := capsule.Sign(*output, *signer)
 		if err != nil {
@@ -166,8 +191,10 @@ func runVerify(args []string, stdout, stderr io.Writer) error {
 	flags.SetOutput(stderr)
 	var trustPaths repeatedFlags
 	flags.Var(&trustPaths, "trust", "trusted public identity file (repeatable)")
+	parentPath := flags.String("parent", "", "parent capsule directory used to verify ancestry")
 	requireSignature := flags.Bool("require-signature", false, "reject unsigned capsules")
 	requireTrusted := flags.Bool("require-trusted", false, "reject capsules not signed by a trusted identity")
+	requireLineage := flags.Bool("require-lineage", false, "reject descendants whose parent was not checked")
 	if err := flags.Parse(args); err != nil {
 		return err
 	}
@@ -183,17 +210,42 @@ func runVerify(args []string, stdout, stderr io.Writer) error {
 		}
 		trusted = append(trusted, public)
 	}
-	manifest, authenticity, err := capsule.VerifyAuthenticated(flags.Arg(0), capsule.VerifyOptions{
+	verificationOptions := capsule.VerifyOptions{
 		Trusted:          trusted,
 		RequireSignature: *requireSignature,
 		RequireTrusted:   *requireTrusted,
-	})
+	}
+	manifest, authenticity, err := capsule.VerifyAuthenticated(flags.Arg(0), verificationOptions)
 	if err != nil {
 		return err
 	}
-	fmt.Fprintf(stdout, "verified %s\nassets: %d\nsignature: %s\n", manifest.CapsuleID, len(manifest.Assets), authenticity.Status)
+
+	lineage := capsule.DescribeLineage(manifest)
+	if manifest.ParentCapsuleID == "" {
+		if strings.TrimSpace(*parentPath) != "" {
+			return errors.New("root capsule does not declare a parent")
+		}
+	} else if strings.TrimSpace(*parentPath) == "" {
+		if *requireLineage {
+			return fmt.Errorf("capsule declares parent %s but no --parent was supplied", manifest.ParentCapsuleID)
+		}
+	} else {
+		parentManifest, parentAuthenticity, err := capsule.VerifyAuthenticated(*parentPath, verificationOptions)
+		if err != nil {
+			return fmt.Errorf("verify parent capsule: %w", err)
+		}
+		lineage, err = capsule.CheckLineage(manifest, authenticity, parentManifest, parentAuthenticity)
+		if err != nil {
+			return err
+		}
+	}
+
+	fmt.Fprintf(stdout, "verified %s\nassets: %d\nsignature: %s\nlineage: %s\n", manifest.CapsuleID, len(manifest.Assets), authenticity.Status, lineage.Status)
 	if authenticity.SignerID != "" {
 		fmt.Fprintf(stdout, "signer: %s\n", authenticity.SignerID)
+	}
+	if lineage.ParentCapsuleID != "" {
+		fmt.Fprintf(stdout, "parent: %s\n", lineage.ParentCapsuleID)
 	}
 	return nil
 }
@@ -204,9 +256,9 @@ func printUsage(writer io.Writer) {
 Usage:
   arkmesh identity create --out DIR
   arkmesh identity show PUBLIC_IDENTITY
-  arkmesh pack --name NAME --out DIR --asset role=/path/to/file [--asset ...] [--signing-key PRIVATE_IDENTITY]
+  arkmesh pack --name NAME --out DIR --asset role=/path/to/file [--asset ...] [--signing-key PRIVATE_IDENTITY] [--parent PARENT_CAPSULE]
   arkmesh inspect DIR
-  arkmesh verify [--trust PUBLIC_IDENTITY] [--require-signature] [--require-trusted] DIR
+  arkmesh verify [--trust PUBLIC_IDENTITY] [--require-signature] [--require-trusted] [--parent PARENT_CAPSULE] [--require-lineage] DIR
 
-Integrity verification remains available for unsigned capsules. Trust is local and explicit.`)
+Integrity verification remains available for unsigned capsules. Descendants require the same signer as their parent. Trust is local and explicit.`)
 }

@@ -32,16 +32,18 @@ Read [The ArkMesh Promise](MANIFESTO.md) for the longer motivation and the proje
 - Create local Ed25519 author identities
 - Sign capsules without placing private keys inside them
 - Verify trusted, unknown, invalid, and unsigned capsule states offline
+- Bind a child capsule to one parent ID
+- Verify same-author update authority across a parent and child
 - Inspect a capsule manifest
-- Detect missing files, changed content, manifest edits, invalid roles, and invalid signatures
+- Detect missing files, changed content, manifest edits, invalid roles, invalid signatures, wrong parents, and unauthorized child signers
 
 ### Not built yet
 
-- Key revocation and rotation
+- Key revocation, rotation, and delegated update authority
 - Peer discovery and encrypted transfer
 - Resumable chunk exchange
 - Local model inference
-- Capsule ancestry and reconciliation
+- Divergent branch reconciliation
 - Erasure coding
 - Recovery dashboard
 
@@ -138,7 +140,7 @@ The implementation currently uses only the Go standard library.
 2. **Authenticity:** identities, signatures, and explicit local trust are implemented. Revocation and rotation remain open.
 3. **Replication:** encrypted LAN discovery and resumable transfer between invited peers.
 4. **Execution:** llama.cpp integration and local inference health checks.
-5. **Continuity:** parentage, divergent descendants, partition recovery, and deliberate reconciliation.
+5. **Continuity:** same-author parentage is implemented. Divergent descendants, partition recovery, and deliberate reconciliation remain open.
 6. **Resilience:** erasure coding, repair, varied hardware, and offline media.
 7. **Evidence:** simulated and physical failure tests against simpler baselines.
 
