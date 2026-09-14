@@ -46,6 +46,10 @@ func run(args []string, stdout, stderr io.Writer) int {
 		err = runRecovery(args[1:], stdout, stderr)
 	case "chunks":
 		err = runChunks(args[1:], stdout, stderr)
+	case "erasure":
+		err = runErasure(args[1:], stdout, stderr)
+	case "audit":
+		err = runAudit(args[1:], stdout, stderr)
 	case "pack":
 		err = runPack(args[1:], stdout, stderr)
 	case "inspect":
@@ -392,9 +396,13 @@ Usage:
   arkmesh chunks tree --asset DIGEST --out FILE CAPSULE
   arkmesh chunks scan --tree FILE CAPSULE
   arkmesh chunks repair --tree FILE --source FILE CAPSULE
+  arkmesh erasure protect --asset DIGEST [--data K] [--parity M] --shards DIR --plan FILE CAPSULE
+  arkmesh erasure recover --plan FILE --shards DIR CAPSULE
+  arkmesh audit sample --tree FILE [--tolerance F] [--confidence F] [--samples N] [--log FILE] CAPSULE
+  arkmesh audit history --log FILE
   arkmesh pack --name NAME --out DIR --asset role=/path/to/file [--asset ...] [--signing-key PRIVATE_IDENTITY] [--parent PARENT_CAPSULE] [--rotation-key PARENT_PRIVATE_IDENTITY] [--recovery-policy POLICY] [--chunk-size BYTES]
   arkmesh inspect DIR
   arkmesh verify [--trust PUBLIC_IDENTITY] [--revocations FILE] [--checkpoint FILE] [--require-signature] [--require-trusted] [--parent PARENT_CAPSULE] [--require-lineage] DIR
 
-Integrity verification remains available for unsigned capsules. Signed chunk roots allow single chunk possession proofs, damage localization, and repair that verifies donor chunks before writing them. Parent-signed transitions authorize exact planned rotations. Threshold recovery requires distinct approvals under explicit local policy. Local checkpoints reject rollback to another capsule head. Local revocation policy overrides trust.`)
+Integrity verification remains available for unsigned capsules. Signed chunk roots allow single chunk possession proofs, damage localization, and repair that verifies donor chunks before writing them. Reed Solomon shards rebuild a missing object without any donor holding it, and reconstructed bytes must match the signed manifest. Sampled audits report a retrievability bound with explicit confidence rather than claiming intactness. Parent-signed transitions authorize exact planned rotations. Threshold recovery requires distinct approvals under explicit local policy. Local checkpoints reject rollback to another capsule head. Local revocation policy overrides trust.`)
 }

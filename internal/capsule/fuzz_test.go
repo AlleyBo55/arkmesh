@@ -53,5 +53,9 @@ func FuzzCapsuleEnvelopeDecoders(f *testing.F) {
 		if json.Unmarshal(data, &tree) == nil {
 			_, _ = VerifyChunkTreeFile(manifest, tree)
 		}
+		var plan ErasurePlan
+		if json.Unmarshal(data, &plan) == nil {
+			_, _ = validateErasurePlan(manifest, plan)
+		}
 	})
 }

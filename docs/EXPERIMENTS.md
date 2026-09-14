@@ -66,8 +66,16 @@ Status: implemented in the reference CLI and automated tests.
 36. Corrupt one chunk of a copy and confirm the scan names that exact chunk index and offset.
 37. Repair only the damaged chunk from a donor and confirm the capsule verifies again.
 38. Offer a hostile donor and a forged tree, and confirm both are refused without writing bytes.
+39. Protect an asset with four data and two parity shards.
+40. Delete the object entirely plus two shards, then recover with no donor holding the missing bytes.
+41. Confirm the recovered bytes are identical and the capsule verifies as trusted again.
+42. Remove a third shard and confirm recovery is refused without writing anything.
+43. Run a sampled audit and confirm it reports a bound with explicit confidence rather than claiming intactness.
+44. Run an exhaustive audit and confirm it proves zero damage.
+45. Corrupt one chunk, audit again, and confirm the failing index is named and no bound is claimed.
+46. Confirm the retention log records both outcomes and rejects malformed lines.
 
-Pass condition: intact objects, valid signatures, same-author ancestry, exact planned rotations, retained local checkpoints, threshold recovery, chunk commitments, and verified repair all succeed. Tested modifications, wrong parents, reused transitions, revoked signers, insufficient recovery approvals, unauthorized descendants, forged chunk proofs, forged trees, hostile donors, and rollback to an old capsule are rejected. Trust is never inferred from an embedded public key, and unsigned root compatibility remains explicit.
+Pass condition: intact objects, valid signatures, same-author ancestry, exact planned rotations, retained local checkpoints, threshold recovery, chunk commitments, verified repair, and donorless erasure recovery all succeed. Tested modifications, wrong parents, reused transitions, revoked signers, insufficient recovery approvals, unauthorized descendants, forged chunk proofs, forged trees, hostile donors, forged shard sets, losses beyond parity, and rollback to an old capsule are rejected. Trust is never inferred from an embedded public key, and unsigned root compatibility remains explicit.
 
 ## E1: Three-node LAN continuity
 

@@ -32,6 +32,9 @@ Read [The ArkMesh Promise](MANIFESTO.md) for the longer motivation and the proje
 - Prove and verify possession of one exact chunk without holding the whole object
 - Locate the exact damaged chunks of a replica against an authenticated chunk tree
 - Repair only the damaged chunks, verifying every donor chunk before writing it
+- Rebuild a lost object from Reed Solomon shards with no donor holding its bytes
+- Bound how much of a replica can be missing, by random sampling with stated confidence
+- Record an audit history so retention is observed rather than assumed
 - Verify independent objects in parallel with deterministic error reporting
 - Derive a deterministic capsule ID
 - Create local Ed25519 author identities
@@ -51,11 +54,11 @@ Read [The ArkMesh Promise](MANIFESTO.md) for the longer motivation and the proje
 
 - Distribution or organizational signing of revocation and recovery policies
 - Peer discovery and encrypted transfer
-- Erasure coding, so repair still needs a donor holding the missing bytes
+- Shard placement, repair scheduling, and replica health metrics
 - Measured retention over time rather than possession at one moment
+- Independently attested time, so retention logs rely on local clocks
 - Local model inference
 - Replay agreement across peers and divergent branch reconciliation
-- Erasure coding
 - Recovery dashboard
 
 A valid signature proves that the holder of a specific private key signed the capsule ID. It does not prove the author's legal identity, the truth of the contents, license compliance, or safety. Trust is imported explicitly by each operator.
@@ -153,7 +156,7 @@ The security gate adds race detection and bounded fuzzing for capsule and identi
 3. **Replication:** encrypted LAN discovery and resumable transfer between invited peers.
 4. **Execution:** llama.cpp integration and local inference health checks.
 5. **Continuity:** same-author parentage, exact rotation edges, and local head checkpoints are implemented. Divergent descendants, partition recovery, and deliberate reconciliation remain open.
-6. **Resilience:** erasure coding, repair, varied hardware, and offline media.
+6. **Resilience:** chunk repair and Reed Solomon erasure coding are implemented. Shard placement, varied hardware, and offline media remain open.
 7. **Evidence:** simulated and physical failure tests against simpler baselines.
 
 ## Safety
@@ -179,6 +182,8 @@ Read the full [threat model](docs/THREAT_MODEL.md).
 - [Threat Model](docs/THREAT_MODEL.md): assets, trust boundaries, attacks, and propagation limits
 - [Capsule Protocol](docs/PROTOCOL.md): current capsule, signature, and lineage format
 - [Chunk Commitments](docs/CHUNKS.md): Merkle chunk roots and possession proofs
+- [Erasure Coding](docs/ERASURE.md): Reed Solomon shards and donorless recovery
+- [Sampled Audits](docs/AUDIT.md): retrievability bounds, confidence, and retention history
 - [Key Authority and Revocation](docs/AUTHORITY.md): exact planned rotations and local rejection policy
 - [Threshold Emergency Recovery](docs/RECOVERY.md): independent approvals and exact recovery edges
 - [Local Lineage Checkpoints](docs/CHECKPOINTS.md): accepted heads, direct advancement, and rollback limits

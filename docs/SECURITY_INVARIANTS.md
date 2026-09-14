@@ -28,6 +28,17 @@ These are release gates, not aspirations.
 8. A chunk tree file is authenticated by recomputing the signed root, never trusted because it was supplied.
 9. Repair verifies each donor chunk against the authenticated tree before writing it, and never writes unverified bytes.
 10. Parallel object verification reports the same asset as sequential verification.
+11. An erasure plan is not a trust anchor: reconstructed bytes are verified against the signed manifest before they are written.
+12. Recovery writes through a temporary file and refuses to replace an object when verification fails.
+13. Recovery refuses to proceed when fewer than the required number of usable shards survive.
+
+## Sampled audits
+
+1. Audit samples come from a cryptographic source, never a seeded or predictable generator.
+2. A partial audit never reports full integrity, only a bound at a stated confidence.
+3. An audit that observes damage claims no retrievability bound at all.
+4. Sampled chunks are compared against a tree already authenticated by the signed manifest.
+5. A retention log records observations and never claims completeness or attested time.
 
 ## Authority
 
