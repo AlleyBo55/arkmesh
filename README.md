@@ -38,13 +38,13 @@ Read [The ArkMesh Promise](MANIFESTO.md) for the longer motivation and the proje
 - Apply explicit local revocation policies during offline verification
 - Pin one accepted lineage head in a local checkpoint
 - Advance a checkpoint through one verified direct lineage edge
+- Recover from old-key loss through distinct threshold approvals
 - Inspect a capsule manifest
-- Detect missing files, changed content, invalid signatures, wrong parents, reused transitions, revoked signers, unauthorized child keys, and rollback against a retained checkpoint
+- Detect missing files, changed content, invalid signatures, wrong parents, reused transitions, revoked signers, insufficient recovery approval, unauthorized child keys, and rollback against a retained checkpoint
 
 ### Not built yet
 
-- Emergency recovery after the old private key is lost
-- Distribution or organizational signing of revocation policies
+- Distribution or organizational signing of revocation and recovery policies
 - Peer discovery and encrypted transfer
 - Resumable chunk exchange
 - Local model inference
@@ -142,7 +142,7 @@ The implementation currently uses only the Go standard library.
 ## Research roadmap
 
 1. **Integrity:** deterministic manifests and tamper detection are implemented.
-2. **Authenticity:** identities, signatures, explicit local trust, planned key rotation, and local revocation are implemented. Emergency recovery authority and shared revocation distribution remain open.
+2. **Authenticity:** identities, signatures, explicit local trust, planned key rotation, local revocation, and threshold emergency recovery are implemented. Shared policy distribution remains open.
 3. **Replication:** encrypted LAN discovery and resumable transfer between invited peers.
 4. **Execution:** llama.cpp integration and local inference health checks.
 5. **Continuity:** same-author parentage, exact rotation edges, and local head checkpoints are implemented. Divergent descendants, partition recovery, and deliberate reconciliation remain open.
@@ -172,6 +172,7 @@ Read the full [threat model](docs/THREAT_MODEL.md).
 - [Threat Model](docs/THREAT_MODEL.md): assets, trust boundaries, attacks, and propagation limits
 - [Capsule Protocol](docs/PROTOCOL.md): current capsule, signature, and lineage format
 - [Key Authority and Revocation](docs/AUTHORITY.md): exact planned rotations and local rejection policy
+- [Threshold Emergency Recovery](docs/RECOVERY.md): independent approvals and exact recovery edges
 - [Local Lineage Checkpoints](docs/CHECKPOINTS.md): accepted heads, direct advancement, and rollback limits
 - [Experiment Plan](docs/EXPERIMENTS.md): metrics, baselines, partition tests, and recovery rehearsal
 - [GitHub Setup](.github/REPOSITORY_METADATA.md): repository description, topics, and issue labels

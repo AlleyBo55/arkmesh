@@ -42,6 +42,8 @@ func run(args []string, stdout, stderr io.Writer) int {
 		err = runIdentity(args[1:], stdout, stderr)
 	case "checkpoint":
 		err = runCheckpoint(args[1:], stdout, stderr)
+	case "recovery":
+		err = runRecovery(args[1:], stdout, stderr)
 	case "pack":
 		err = runPack(args[1:], stdout, stderr)
 	case "inspect":
@@ -132,6 +134,7 @@ func runPack(args []string, stdout, stderr io.Writer) error {
 	output := flags.String("out", "", "output capsule directory")
 	signingKey := flags.String("signing-key", "", "private identity used to sign the capsule")
 	rotationKey := flags.String("rotation-key", "", "parent private identity authorizing a new child signer")
+	recoveryPolicyPath := flags.String("recovery-policy", "", "recovery policy that will authorize a new child signer")
 	parentPath := flags.String("parent", "", "verified parent capsule directory")
 	var assets repeatedFlags
 	flags.Var(&assets, "asset", "asset as role=/path/to/file (repeatable)")
@@ -165,7 +168,13 @@ func runPack(args []string, stdout, stderr io.Writer) error {
 	parentCapsuleID := ""
 	var parentManifest capsule.Manifest
 	var parentAuthenticity capsule.Authenticity
+	var recoveryPolicy capsule.RecoveryPolicy
 	isRotation := false
+	isRecovery := false
+	recoveryRequested := strings.TrimSpace(*recoveryPolicyPath) != ""
+	if rotationSigner != nil && recoveryRequested {
+		return errors.New("--rotation-key and --recovery-policy are mutually exclusive")
+	}
 	if strings.TrimSpace(*parentPath) != "" {
 		if signer == nil {
 			return errors.New("--parent requires --signing-key")
@@ -180,12 +189,18 @@ func runPack(args []string, stdout, stderr io.Writer) error {
 			return fmt.Errorf("validate child signer: %w", err)
 		}
 		if parentAuthenticity.SignerID == publicSigner.KeyID {
-			if rotationSigner != nil {
-				return errors.New("same-author child must not include --rotation-key")
+			if rotationSigner != nil || recoveryRequested {
+				return errors.New("same-author child must not include rotation or recovery authority")
 			}
+		} else if recoveryRequested {
+			recoveryPolicy, err = capsule.LoadRecoveryPolicy(*recoveryPolicyPath)
+			if err != nil {
+				return err
+			}
+			isRecovery = true
 		} else {
 			if rotationSigner == nil {
-				return fmt.Errorf("different child signer %s requires --rotation-key from parent signer %s", publicSigner.KeyID, parentAuthenticity.SignerID)
+				return fmt.Errorf("different child signer %s requires --rotation-key or --recovery-policy", publicSigner.KeyID)
 			}
 			rotationPublic, err := rotationSigner.Public()
 			if err != nil {
@@ -197,8 +212,8 @@ func runPack(args []string, stdout, stderr io.Writer) error {
 			isRotation = true
 		}
 		parentCapsuleID = parentManifest.CapsuleID
-	} else if rotationSigner != nil {
-		return errors.New("--rotation-key requires --parent")
+	} else if rotationSigner != nil || recoveryRequested {
+		return errors.New("rotation and recovery authority require --parent")
 	}
 
 	sources := make([]capsule.AssetSource, 0, len(assets))
@@ -237,6 +252,9 @@ func runPack(args []string, stdout, stderr io.Writer) error {
 			return err
 		}
 		fmt.Fprintf(stdout, "key rotation: %s -> %s\n", transition.PreviousSignerID, transition.NextSigner.KeyID)
+	}
+	if isRecovery {
+		fmt.Fprintf(stdout, "recovery pending: %s\n", recoveryPolicy.PolicyID)
 	}
 	return nil
 }
@@ -360,10 +378,13 @@ Usage:
   arkmesh identity revoke --identity PUBLIC_IDENTITY [--identity ...] --out FILE
   arkmesh checkpoint create --out FILE --trust PUBLIC_IDENTITY [--revocations FILE] CAPSULE
   arkmesh checkpoint show FILE
-  arkmesh checkpoint advance --checkpoint FILE --parent PARENT_CAPSULE [--revocations FILE] CHILD_CAPSULE
-  arkmesh pack --name NAME --out DIR --asset role=/path/to/file [--asset ...] [--signing-key PRIVATE_IDENTITY] [--parent PARENT_CAPSULE] [--rotation-key PARENT_PRIVATE_IDENTITY]
+  arkmesh checkpoint advance --checkpoint FILE --parent PARENT_CAPSULE [--recovery-policy POLICY] [--revocations FILE] CHILD_CAPSULE
+  arkmesh recovery policy create --threshold N --identity PUBLIC_IDENTITY [--identity ...] --out FILE
+  arkmesh recovery approve --policy POLICY --signing-key PRIVATE_IDENTITY --parent PARENT --out FILE CHILD
+  arkmesh recovery assemble --policy POLICY --parent PARENT --approval FILE [--approval ...] [--revocations FILE] CHILD
+  arkmesh pack --name NAME --out DIR --asset role=/path/to/file [--asset ...] [--signing-key PRIVATE_IDENTITY] [--parent PARENT_CAPSULE] [--rotation-key PARENT_PRIVATE_IDENTITY] [--recovery-policy POLICY]
   arkmesh inspect DIR
   arkmesh verify [--trust PUBLIC_IDENTITY] [--revocations FILE] [--checkpoint FILE] [--require-signature] [--require-trusted] [--parent PARENT_CAPSULE] [--require-lineage] DIR
 
-Integrity verification remains available for unsigned capsules. Parent-signed transitions authorize exact key rotations. Local checkpoints reject rollback to another capsule head. Local revocation policy overrides trust.`)
+Integrity verification remains available for unsigned capsules. Parent-signed transitions authorize exact planned rotations. Threshold recovery requires distinct approvals under explicit local policy. Local checkpoints reject rollback to another capsule head. Local revocation policy overrides trust.`)
 }

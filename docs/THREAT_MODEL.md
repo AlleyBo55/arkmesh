@@ -64,9 +64,9 @@ Crossing this boundary would make the system worm-like and invalidate the projec
 
 ## v0alpha1 limitations
 
-The current implementation verifies SHA-256 object integrity, Ed25519 capsule signatures, same-author lineage, exact parent-signed key rotations, local operator revocation policies, and exact local lineage checkpoints. A retained checkpoint rejects another valid capsule as the accepted head and advances only through one verified direct lineage edge. Trust roots, parent capsules, revocation files, and checkpoints are supplied manually.
+The current implementation verifies SHA-256 object integrity, Ed25519 capsule signatures, same-author lineage, exact parent-signed key rotations, local operator revocation policies, exact local lineage checkpoints, and checkpoint-anchored threshold recovery. Recovery requires at least two distinct policy members, detached signatures over one exact edge, and enough unrevoked approvals.
 
-A checkpoint cannot detect replacement or rollback of the checkpoint file itself. ArkMesh still does not provide emergency recovery after old-key loss, organizational revocation signatures, replay consensus across peers or divergent branches, encrypted transfer, peer authentication, model execution, or legal identity proof. A valid transition proves that the parent key authorized one child key for one lineage edge. It does not prove safety, truth, license compliance, or authorization to execute capsule contents.
+A local attacker who can replace checkpoint, revocation, or recovery policy files remains inside the trusted device boundary. ArkMesh does not provide organizational policy distribution, replay consensus across peers or divergent branches, encrypted transfer, peer authentication, model execution, or legal identity proof. Cryptographic approval does not prove safety, truth, license compliance, custodian independence, or authorization to execute capsule contents.
 
 ## Out of scope
 
