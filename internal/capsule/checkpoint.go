@@ -129,6 +129,28 @@ func AdvanceCheckpointFile(path, childRoot string, parent Manifest, parentAuthen
 	return next, lineage, nil
 }
 
+func AdvanceCheckpointFileWithRecovery(path, childRoot string, parent Manifest, parentAuthenticity Authenticity, child Manifest, childAuthenticity Authenticity, policy RecoveryPolicy, revocations identity.RevocationSet) (Checkpoint, Lineage, error) {
+	current, err := LoadCheckpoint(path)
+	if err != nil {
+		return Checkpoint{}, Lineage{}, err
+	}
+	if err := VerifyCheckpoint(current, parent, parentAuthenticity); err != nil {
+		return Checkpoint{}, Lineage{}, fmt.Errorf("verify checkpoint parent: %w", err)
+	}
+	lineage, err := CheckLineageWithRecovery(childRoot, child, childAuthenticity, parent, parentAuthenticity, policy, revocations)
+	if err != nil {
+		return Checkpoint{}, Lineage{}, fmt.Errorf("verify checkpoint recovery: %w", err)
+	}
+	next, err := NewCheckpoint(child, childAuthenticity)
+	if err != nil {
+		return Checkpoint{}, Lineage{}, err
+	}
+	if err := replaceCheckpoint(path, current, next); err != nil {
+		return Checkpoint{}, Lineage{}, err
+	}
+	return next, lineage, nil
+}
+
 func (checkpoint Checkpoint) Validate() error {
 	if checkpoint.SchemaVersion != CheckpointSchemaVersion {
 		return fmt.Errorf("unsupported checkpoint schema %q", checkpoint.SchemaVersion)

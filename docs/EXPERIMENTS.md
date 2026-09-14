@@ -53,8 +53,13 @@ Status: implemented in the reference CLI and automated tests.
 23. Advance the checkpoint through an exact parent-signed key rotation.
 24. Verify the rotated child as the exact accepted head.
 25. Present the old valid parent and confirm checkpoint verification rejects the rollback.
+26. Create three independent recovery identities and a two-of-three policy.
+27. Pack an exact replacement child without using the old private key.
+28. Produce detached approvals from two recovery identities.
+29. Assemble and advance the checkpoint as `verified_threshold_recovery`.
+30. Confirm one approval, duplicate approvals, modified evidence, and revoked approvals below threshold fail.
 
-Pass condition: intact objects, valid signatures, same-author ancestry, exact planned rotations, and retained local checkpoints verify. Tested modifications, wrong parents, reused transitions, revoked signers, unauthorized descendants, and rollback to an old capsule are rejected. Trust is never inferred from an embedded public key, and unsigned root compatibility remains explicit.
+Pass condition: intact objects, valid signatures, same-author ancestry, exact planned rotations, retained local checkpoints, and threshold recovery verify. Tested modifications, wrong parents, reused transitions, revoked signers, insufficient recovery approvals, unauthorized descendants, and rollback to an old capsule are rejected. Trust is never inferred from an embedded public key, and unsigned root compatibility remains explicit.
 
 ## E1: Three-node LAN continuity
 

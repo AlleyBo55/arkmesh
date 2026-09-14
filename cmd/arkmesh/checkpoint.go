@@ -73,13 +73,14 @@ func runCheckpoint(args []string, stdout, stderr io.Writer) error {
 		flags.SetOutput(stderr)
 		checkpointPath := flags.String("checkpoint", "", "local checkpoint file to advance")
 		parentPath := flags.String("parent", "", "checkpointed parent capsule directory")
+		recoveryPolicyPath := flags.String("recovery-policy", "", "recovery policy for an emergency child")
 		var revocationPaths repeatedFlags
 		flags.Var(&revocationPaths, "revocations", "local revocation policy file (repeatable)")
 		if err := flags.Parse(args[1:]); err != nil {
 			return err
 		}
 		if flags.NArg() != 1 || strings.TrimSpace(*checkpointPath) == "" || strings.TrimSpace(*parentPath) == "" {
-			return errors.New("usage: arkmesh checkpoint advance --checkpoint FILE --parent PARENT_CAPSULE [--revocations FILE] CHILD_CAPSULE")
+			return errors.New("usage: arkmesh checkpoint advance --checkpoint FILE --parent PARENT_CAPSULE [--recovery-policy POLICY] [--revocations FILE] CHILD_CAPSULE")
 		}
 		revocations, err := loadRevocations(revocationPaths)
 		if err != nil {
@@ -99,7 +100,17 @@ func runCheckpoint(args []string, stdout, stderr io.Writer) error {
 		if err != nil {
 			return fmt.Errorf("verify checkpoint child: %w", err)
 		}
-		next, lineage, err := capsule.AdvanceCheckpointFile(*checkpointPath, flags.Arg(0), parentManifest, parentAuthenticity, childManifest, childAuthenticity)
+		var next capsule.Checkpoint
+		var lineage capsule.Lineage
+		if strings.TrimSpace(*recoveryPolicyPath) != "" {
+			policy, err := capsule.LoadRecoveryPolicy(*recoveryPolicyPath)
+			if err != nil {
+				return err
+			}
+			next, lineage, err = capsule.AdvanceCheckpointFileWithRecovery(*checkpointPath, flags.Arg(0), parentManifest, parentAuthenticity, childManifest, childAuthenticity, policy, revocations)
+		} else {
+			next, lineage, err = capsule.AdvanceCheckpointFile(*checkpointPath, flags.Arg(0), parentManifest, parentAuthenticity, childManifest, childAuthenticity)
+		}
 		if err != nil {
 			return err
 		}

@@ -48,10 +48,11 @@ Struct field order is fixed by the reference implementation for v0alpha1. This d
 
 A root has no declared parent. A child names one parent capsule ID, and the supplied parent must verify and match that exact ID. Parent and child must both have valid Ed25519 signatures.
 
-Two update paths are implemented:
+Three update paths are implemented:
 
 1. **Same author:** parent and child use the same signing key. No authority file is allowed.
 2. **Planned key rotation:** the child uses a new key and includes `authority.json`, signed by the parent key, binding the exact parent ID, child ID, old signer, and new signer.
+3. **Threshold recovery:** independently controlled recovery keys approve the exact replacement edge under an explicit local policy, and the child includes `recovery.json`.
 
 Verification reports:
 
@@ -59,12 +60,13 @@ Verification reports:
 - `parent_not_checked` when a parent is declared but not supplied
 - `verified_same_author` when parent and child use the same valid signer
 - `verified_key_rotation` when the parent key authorized the child's exact new signer
+- `verified_threshold_recovery` when enough distinct unrevoked recovery members approved the exact edge
 
-Strict lineage mode rejects a descendant when its parent was not supplied. A mismatched parent, invalid signature, missing authority, reused transition, revoked signer, or unauthorized child key is rejected.
+Strict lineage mode rejects a descendant when its parent was not supplied. A mismatched parent, invalid signature, missing authority, reused transition, revoked signer, insufficient recovery threshold, or unauthorized child key is rejected.
 
-Branches from one parent remain possible. ArkMesh does not select a winning branch or merge descendants. Planned rotation also requires access to the old private key before the child is created.
+Branches from one parent remain possible. ArkMesh does not select a winning branch or merge descendants. Planned rotation requires the old private key. Threshold recovery instead requires the retained checkpointed parent, explicit policy, and enough surviving custodians.
 
-See [Key Authority and Revocation](AUTHORITY.md) for the exact transition payload, trust inheritance rule, local revocation format, and limitations.
+See [Key Authority and Revocation](AUTHORITY.md), [Threshold Emergency Recovery](RECOVERY.md), and [Local Lineage Checkpoints](CHECKPOINTS.md) for exact formats and limitations.
 
 ## Asset roles
 
@@ -164,8 +166,7 @@ A retained checkpoint rejects rollback to another valid capsule. It does not est
 
 Peer replication must not ship until later work defines:
 
-- Emergency recovery authority for old-key loss
-- Distribution and organizational signing of revocation policies
+- Distribution and organizational signing of revocation and recovery policies
 - Trust group invitation and import flow
 - Replay rules across peers and divergent branches
 - License and provenance declarations
