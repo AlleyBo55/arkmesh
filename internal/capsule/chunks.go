@@ -11,7 +11,7 @@ import (
 
 const (
 	ChunkProofSchemaVersion = "arkmesh.chunk-proof/v0alpha1"
-	DefaultChunkSize        = int64(1) << 20
+	DefaultChunkSize        = int64(1) << 16
 	MinChunkSize            = int64(4096)
 	MaxChunkSize            = int64(1) << 26
 )
