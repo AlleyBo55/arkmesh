@@ -11,8 +11,10 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"runtime"
 	"sort"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -156,44 +158,77 @@ func Verify(root string) (Manifest, error) {
 		return Manifest{}, err
 	}
 
-	for _, asset := range manifest.Assets {
-		objectPath := filepath.Join(root, "objects", asset.SHA256)
-		info, err := os.Lstat(objectPath)
-		if err != nil {
-			return Manifest{}, fmt.Errorf("asset %q (%s): %w", asset.Name, asset.Role, err)
-		}
-		if !info.Mode().IsRegular() {
-			return Manifest{}, fmt.Errorf("asset %q (%s): object is not a regular file", asset.Name, asset.Role)
-		}
-		if info.Size() != asset.Size {
-			return Manifest{}, fmt.Errorf("asset %q (%s): size mismatch: manifest=%d actual=%d", asset.Name, asset.Role, asset.Size, info.Size())
-		}
-		if asset.ChunkRoot != "" {
-			digest, _, tree, err := ScanObject(objectPath, asset.ChunkSize)
-			if err != nil {
-				return Manifest{}, fmt.Errorf("asset %q (%s): %w", asset.Name, asset.Role, err)
+	// Objects are independent, so they are checked concurrently. Results are
+	// collected per asset and reported in manifest order, which keeps the
+	// surfaced error identical to sequential verification.
+	failures := make([]error, len(manifest.Assets))
+	workers := runtime.GOMAXPROCS(0)
+	if workers > 4 {
+		workers = 4
+	}
+	if workers > len(manifest.Assets) {
+		workers = len(manifest.Assets)
+	}
+	queue := make(chan int)
+	var group sync.WaitGroup
+	for worker := 0; worker < workers; worker++ {
+		group.Add(1)
+		go func() {
+			defer group.Done()
+			for index := range queue {
+				failures[index] = verifyAsset(root, manifest.Assets[index])
 			}
-			if digest != asset.SHA256 {
-				return Manifest{}, fmt.Errorf("asset %q (%s): digest mismatch", asset.Name, asset.Role)
-			}
-			if tree.Count != ChunkCount(asset.Size, asset.ChunkSize) {
-				return Manifest{}, fmt.Errorf("asset %q (%s): chunk count mismatch", asset.Name, asset.Role)
-			}
-			if tree.Root != asset.ChunkRoot {
-				return Manifest{}, fmt.Errorf("asset %q (%s): chunk root mismatch", asset.Name, asset.Role)
-			}
-			continue
-		}
-		digest, _, err := hashFile(objectPath)
-		if err != nil {
-			return Manifest{}, fmt.Errorf("asset %q (%s): %w", asset.Name, asset.Role, err)
-		}
-		if digest != asset.SHA256 {
-			return Manifest{}, fmt.Errorf("asset %q (%s): digest mismatch", asset.Name, asset.Role)
+		}()
+	}
+	for index := range manifest.Assets {
+		queue <- index
+	}
+	close(queue)
+	group.Wait()
+	for _, failure := range failures {
+		if failure != nil {
+			return Manifest{}, failure
 		}
 	}
-
 	return manifest, nil
+}
+
+func verifyAsset(root string, asset Asset) error {
+	objectPath := filepath.Join(root, "objects", asset.SHA256)
+	info, err := os.Lstat(objectPath)
+	if err != nil {
+		return fmt.Errorf("asset %q (%s): %w", asset.Name, asset.Role, err)
+	}
+	if !info.Mode().IsRegular() {
+		return fmt.Errorf("asset %q (%s): object is not a regular file", asset.Name, asset.Role)
+	}
+	if info.Size() != asset.Size {
+		return fmt.Errorf("asset %q (%s): size mismatch: manifest=%d actual=%d", asset.Name, asset.Role, asset.Size, info.Size())
+	}
+	if asset.ChunkRoot != "" {
+		digest, _, tree, err := ScanObject(objectPath, asset.ChunkSize)
+		if err != nil {
+			return fmt.Errorf("asset %q (%s): %w", asset.Name, asset.Role, err)
+		}
+		if digest != asset.SHA256 {
+			return fmt.Errorf("asset %q (%s): digest mismatch", asset.Name, asset.Role)
+		}
+		if tree.Count != ChunkCount(asset.Size, asset.ChunkSize) {
+			return fmt.Errorf("asset %q (%s): chunk count mismatch", asset.Name, asset.Role)
+		}
+		if tree.Root != asset.ChunkRoot {
+			return fmt.Errorf("asset %q (%s): chunk root mismatch", asset.Name, asset.Role)
+		}
+		return nil
+	}
+	digest, _, err := hashFile(objectPath)
+	if err != nil {
+		return fmt.Errorf("asset %q (%s): %w", asset.Name, asset.Role, err)
+	}
+	if digest != asset.SHA256 {
+		return fmt.Errorf("asset %q (%s): digest mismatch", asset.Name, asset.Role)
+	}
+	return nil
 }
 
 func validCapsuleID(value string) bool {

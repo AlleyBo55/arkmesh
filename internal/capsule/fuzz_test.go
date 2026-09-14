@@ -49,5 +49,9 @@ func FuzzCapsuleEnvelopeDecoders(f *testing.F) {
 			_ = VerifyChunkProof(manifest, proof)
 			_ = verifyChunkPath(proof.ChunkRoot, proof.ChunkCount, proof.ChunkIndex, chunkLeafDigest(data), proof.Path)
 		}
+		var tree ChunkTreeFile
+		if json.Unmarshal(data, &tree) == nil {
+			_, _ = VerifyChunkTreeFile(manifest, tree)
+		}
 	})
 }

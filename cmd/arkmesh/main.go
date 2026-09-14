@@ -389,9 +389,12 @@ Usage:
   arkmesh chunks inspect CAPSULE
   arkmesh chunks prove --asset DIGEST --index N --out FILE CAPSULE
   arkmesh chunks check --proof FILE CAPSULE
+  arkmesh chunks tree --asset DIGEST --out FILE CAPSULE
+  arkmesh chunks scan --tree FILE CAPSULE
+  arkmesh chunks repair --tree FILE --source FILE CAPSULE
   arkmesh pack --name NAME --out DIR --asset role=/path/to/file [--asset ...] [--signing-key PRIVATE_IDENTITY] [--parent PARENT_CAPSULE] [--rotation-key PARENT_PRIVATE_IDENTITY] [--recovery-policy POLICY] [--chunk-size BYTES]
   arkmesh inspect DIR
   arkmesh verify [--trust PUBLIC_IDENTITY] [--revocations FILE] [--checkpoint FILE] [--require-signature] [--require-trusted] [--parent PARENT_CAPSULE] [--require-lineage] DIR
 
-Integrity verification remains available for unsigned capsules. Signed chunk roots allow single chunk possession proofs. Parent-signed transitions authorize exact planned rotations. Threshold recovery requires distinct approvals under explicit local policy. Local checkpoints reject rollback to another capsule head. Local revocation policy overrides trust.`)
+Integrity verification remains available for unsigned capsules. Signed chunk roots allow single chunk possession proofs, damage localization, and repair that verifies donor chunks before writing them. Parent-signed transitions authorize exact planned rotations. Threshold recovery requires distinct approvals under explicit local policy. Local checkpoints reject rollback to another capsule head. Local revocation policy overrides trust.`)
 }
