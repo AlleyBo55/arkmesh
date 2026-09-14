@@ -48,8 +48,13 @@ Status: implemented in the reference CLI and automated tests.
 18. Copy the transition to another child and confirm verification fails.
 19. Modify the transition signature and confirm verification fails.
 20. Add the child key to a local revocation policy and confirm verification fails.
+21. Create a local checkpoint from a directly trusted signed parent.
+22. Verify the checkpointed parent without importing another trust root.
+23. Advance the checkpoint through an exact parent-signed key rotation.
+24. Verify the rotated child as the exact accepted head.
+25. Present the old valid parent and confirm checkpoint verification rejects the rollback.
 
-Pass condition: intact objects, valid signatures, same-author ancestry, and exact planned rotations verify. Tested modifications, wrong parents, reused transitions, revoked signers, and unauthorized descendants are rejected. Trust is never inferred from an embedded public key, and unsigned root compatibility remains explicit.
+Pass condition: intact objects, valid signatures, same-author ancestry, exact planned rotations, and retained local checkpoints verify. Tested modifications, wrong parents, reused transitions, revoked signers, unauthorized descendants, and rollback to an old capsule are rejected. Trust is never inferred from an embedded public key, and unsigned root compatibility remains explicit.
 
 ## E1: Three-node LAN continuity
 

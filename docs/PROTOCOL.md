@@ -144,6 +144,22 @@ Verification fails for unknown or trailing manifest fields, malformed envelopes,
 
 A valid trusted signature proves control of the signing private key for that capsule ID. It does not prove content safety, factual accuracy, license compliance, or the human identity behind the key.
 
+## Local lineage checkpoints
+
+An operator may store an accepted lineage head outside the capsule:
+
+```json
+{
+  "schema_version": "arkmesh.checkpoint/v0alpha1",
+  "capsule_id": "sha256:<digest>",
+  "signer_id": "ed25519:<digest>"
+}
+```
+
+Initial creation requires direct trust in the capsule signer. Verification against a checkpoint requires exact capsule ID and signer ID equality. Advancement requires the checkpointed capsule as the supplied parent and one valid direct same-author or key-rotation edge.
+
+A retained checkpoint rejects rollback to another valid capsule. It does not establish a global latest version and cannot detect rollback of the checkpoint file itself. See [Local Lineage Checkpoints](CHECKPOINTS.md) for commands and the complete security boundary.
+
 ## Remaining authenticity work
 
 Peer replication must not ship until later work defines:
@@ -151,7 +167,7 @@ Peer replication must not ship until later work defines:
 - Emergency recovery authority for old-key loss
 - Distribution and organizational signing of revocation policies
 - Trust group invitation and import flow
-- Replay resistant version rules
+- Replay rules across peers and divergent branches
 - License and provenance declarations
 - Runtime compatibility and health checks
 - Chunking rules for resumable large object transfer
