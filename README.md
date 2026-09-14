@@ -63,6 +63,36 @@ Read [The ArkMesh Promise](MANIFESTO.md) for the longer motivation and the proje
 
 A valid signature proves that the holder of a specific private key signed the capsule ID. It does not prove the author's legal identity, the truth of the contents, license compliance, or safety. Trust is imported explicitly by each operator.
 
+## Reproducible evidence
+
+The [`v0.1.0-alpha.1` release](https://github.com/AlleyBo55/arkmesh/releases/tag/v0.1.0-alpha.1) includes a local failure ceremony and published raw measurements.
+
+### Delete it, then recover it
+
+```bash
+./scripts/demo-offline-recovery.sh
+```
+
+The demonstration deletes the publisher source, the complete capsule object, and two of six Reed Solomon shards. ArkMesh rebuilds the exact 8 MiB object from the four surviving shards, requires its SHA-256 digest to match the signed manifest, and verifies the recovered capsule against explicit author trust. A separate attempt with only three usable shards must fail without writing an object.
+
+This ceremony makes no runtime network requests. It proves local donorless reconstruction and authenticated acceptance, not peer transfer, physical device survival, or model execution. See the [full procedure and limits](docs/DEMO.md).
+
+### Measured on a 64 MiB fixture
+
+Wall clock means from three runs on an Apple M5 with Go 1.22:
+
+- Signed capsule pack: 0.125 s
+- Trusted capsule verification: 0.047 s
+- Four data plus two parity protection: 0.211 s
+- Recovery after losing two shards: 0.186 s
+- 99 percent confidence sampled audit: 0.013 s
+- Full copy plus SHA-256 baseline: 0.140 s
+- rsync plus SHA-256 baseline: 0.358 s
+
+The encoded shards added exactly 50 percent storage overhead. The sampled audit checked 349 of 1,024 authenticated chunks. These operations perform different work, so the table is evidence, not a claim that every row is directly equivalent or that ArkMesh is universally faster.
+
+Read the [methodology and limitations](docs/BENCHMARKS.md), [generated report](benchmarks/2026-09-14-apple-m5-64mib/results.md), and [raw CSV](benchmarks/2026-09-14-apple-m5-64mib/raw.csv). BitTorrent, IPFS, peer transport, and inference remain unmeasured.
+
 ## The planned experiment
 
 ```text
