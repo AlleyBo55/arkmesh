@@ -138,3 +138,18 @@ func unsignedFixture(t *testing.T) string {
 	}
 	return output
 }
+
+func TestVerifyRejectsLocallyRevokedSigner(t *testing.T) {
+	t.Parallel()
+	root, _, public := signedFixture(t)
+	revocations, err := identity.NewRevocationSet([]identity.PublicIdentity{public})
+	if err != nil {
+		t.Fatalf("NewRevocationSet() error = %v", err)
+	}
+	if _, _, err := VerifyAuthenticated(root, VerifyOptions{
+		Trusted:     []identity.PublicIdentity{public},
+		Revocations: revocations,
+	}); err == nil || !strings.Contains(err.Error(), "revoked by local policy") {
+		t.Fatalf("VerifyAuthenticated() error = %v, want revoked signer", err)
+	}
+}

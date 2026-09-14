@@ -37,10 +37,12 @@ type SignatureEnvelope struct {
 type Authenticity struct {
 	Status   AuthenticityStatus
 	SignerID string
+	Signer   identity.PublicIdentity
 }
 
 type VerifyOptions struct {
 	Trusted          []identity.PublicIdentity
+	Revocations      identity.RevocationSet
 	RequireSignature bool
 	RequireTrusted   bool
 }
@@ -84,6 +86,9 @@ func VerifyAuthenticated(root string, options VerifyOptions) (Manifest, Authenti
 }
 
 func verifySignature(root string, manifest Manifest, options VerifyOptions) (Authenticity, error) {
+	if err := options.Revocations.Validate(); err != nil {
+		return Authenticity{}, fmt.Errorf("invalid revocation policy: %w", err)
+	}
 	data, err := os.ReadFile(filepath.Join(root, SignatureFileName))
 	if errors.Is(err, os.ErrNotExist) {
 		if options.RequireSignature || options.RequireTrusted {
@@ -119,18 +124,21 @@ func verifySignature(root string, manifest Manifest, options VerifyOptions) (Aut
 	if !ed25519.Verify(publicKey, signaturePayload(manifest.CapsuleID), signature) {
 		return Authenticity{}, errors.New("invalid capsule signature")
 	}
+	if options.Revocations.Contains(envelope.Signer.KeyID) {
+		return Authenticity{}, fmt.Errorf("capsule signer %s is revoked by local policy", envelope.Signer.KeyID)
+	}
 
 	trusted, err := isTrusted(envelope.Signer, options.Trusted)
 	if err != nil {
 		return Authenticity{}, err
 	}
 	if trusted {
-		return Authenticity{Status: AuthenticityTrusted, SignerID: envelope.Signer.KeyID}, nil
+		return Authenticity{Status: AuthenticityTrusted, SignerID: envelope.Signer.KeyID, Signer: envelope.Signer}, nil
 	}
 	if options.RequireTrusted {
 		return Authenticity{}, fmt.Errorf("capsule signer %s is not trusted", envelope.Signer.KeyID)
 	}
-	return Authenticity{Status: AuthenticityUnknown, SignerID: envelope.Signer.KeyID}, nil
+	return Authenticity{Status: AuthenticityUnknown, SignerID: envelope.Signer.KeyID, Signer: envelope.Signer}, nil
 }
 
 func isTrusted(signer identity.PublicIdentity, trusted []identity.PublicIdentity) (bool, error) {

@@ -10,12 +10,13 @@ This document describes the implemented on disk capsule envelope. It is not yet 
 <capsule>/
 ├── manifest.json
 ├── signature.json
+├── authority.json
 └── objects/
     ├── <lowercase sha256>
     └── ...
 ```
 
-`signature.json` is optional so existing unsigned capsules remain valid for local integrity checks. Object paths are derived only from validated lowercase SHA-256 digests. Human provided file names are display metadata and never become storage paths.
+`signature.json` is optional so existing unsigned capsules remain valid for local integrity checks. `authority.json` appears only on a child signed by a new key after an exact parent-signed rotation. Object paths are derived only from validated lowercase SHA-256 digests. Human provided file names are display metadata and never become storage paths.
 
 ## Manifest
 
@@ -45,23 +46,25 @@ Struct field order is fixed by the reference implementation for v0alpha1. This d
 
 ## Lineage and update authority
 
-The implemented rule is intentionally narrow:
+A root has no declared parent. A child names one parent capsule ID, and the supplied parent must verify and match that exact ID. Parent and child must both have valid Ed25519 signatures.
 
-1. A root has no declared parent.
-2. A child names one parent capsule ID.
-3. The supplied parent must verify and match that exact ID.
-4. Parent and child must both have valid Ed25519 signatures.
-5. The child signer must equal the parent signer.
+Two update paths are implemented:
+
+1. **Same author:** parent and child use the same signing key. No authority file is allowed.
+2. **Planned key rotation:** the child uses a new key and includes `authority.json`, signed by the parent key, binding the exact parent ID, child ID, old signer, and new signer.
 
 Verification reports:
 
 - `root` when no parent is declared
-- `parent_not_checked` when a parent is declared but not supplied for verification
-- `verified_same_author` when parent identity, signatures, and signer continuity all pass
+- `parent_not_checked` when a parent is declared but not supplied
+- `verified_same_author` when parent and child use the same valid signer
+- `verified_key_rotation` when the parent key authorized the child's exact new signer
 
-Strict lineage mode rejects a descendant when its parent was not supplied. A mismatched parent, unsigned parent, unsigned child, or different child signer is rejected.
+Strict lineage mode rejects a descendant when its parent was not supplied. A mismatched parent, invalid signature, missing authority, reused transition, revoked signer, or unauthorized child key is rejected.
 
-This rule permits deliberate branches from one parent. It does not pick a winning branch or merge descendants. Key rotation and delegated update authority are not supported yet, so a new key cannot author an accepted child even if the operator believes it belongs to the same person.
+Branches from one parent remain possible. ArkMesh does not select a winning branch or merge descendants. Planned rotation also requires access to the old private key before the child is created.
+
+See [Key Authority and Revocation](AUTHORITY.md) for the exact transition payload, trust inheritance rule, local revocation format, and limitations.
 
 ## Asset roles
 
@@ -145,9 +148,9 @@ A valid trusted signature proves control of the signing private key for that cap
 
 Peer replication must not ship until later work defines:
 
-- Delegated update authority
+- Emergency recovery authority for old-key loss
+- Distribution and organizational signing of revocation policies
 - Trust group invitation and import flow
-- Key revocation and rotation
 - Replay resistant version rules
 - License and provenance declarations
 - Runtime compatibility and health checks
