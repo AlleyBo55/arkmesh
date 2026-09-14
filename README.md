@@ -139,15 +139,17 @@ field-assistant.ark/
 
 Unsigned capsules remain supported for local integrity checks. Object paths come only from validated content hashes. Human supplied names and roles remain metadata.
 
-## Build and test
+## Build, test, and reproduce
 
 ```bash
 go test ./...
 go build ./cmd/arkmesh
 ./scripts/security-gate.sh
+./scripts/demo-offline-recovery.sh
+./scripts/benchmark-local.sh
 ```
 
-The security gate adds race detection and bounded fuzzing for capsule and identity parsers. The implementation currently uses only the Go standard library.
+The security gate adds race detection and bounded fuzzing for capsule and identity parsers. The recovery demonstration deletes the publisher source, the capsule object, and two shards before rebuilding and verifying the exact signed bytes. The benchmark publishes raw timings, storage overhead, and environment details. The implementation currently uses only the Go standard library.
 
 ## Research roadmap
 
@@ -190,6 +192,10 @@ Read the full [threat model](docs/THREAT_MODEL.md).
 - [Security Invariants](docs/SECURITY_INVARIANTS.md): trust properties every change must preserve
 - [Security Policy](SECURITY.md): private vulnerability reporting and response expectations
 - [Experiment Plan](docs/EXPERIMENTS.md): metrics, baselines, partition tests, and recovery rehearsal
+- [Offline Recovery Demo](docs/DEMO.md): reproducible donorless reconstruction ceremony
+- [Benchmarks](docs/BENCHMARKS.md): methodology, raw observations, results, and limits
+- [Release Process](docs/RELEASING.md): validation, artifacts, tags, and publication
+- [Changelog](CHANGELOG.md): release contents and known limits
 - [GitHub Setup](.github/REPOSITORY_METADATA.md): repository description, topics, and issue labels
 
 ## Contributing
