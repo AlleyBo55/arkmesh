@@ -17,3 +17,6 @@
 
 # ArkMesh private author identities
 *.key
+
+# Locally generated benchmark reports
+/benchmark-results/
