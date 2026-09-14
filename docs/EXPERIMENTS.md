@@ -62,8 +62,12 @@ Status: implemented in the reference CLI and automated tests.
 32. Produce a possession proof for one chunk and verify it while holding only the manifest.
 33. Alter the chunk bytes, the chunk index, and the proof path, and confirm each is rejected.
 34. Corrupt a stored object and confirm both capsule verification and proof generation fail.
+35. Export an authenticated chunk tree from a healthy replica.
+36. Corrupt one chunk of a copy and confirm the scan names that exact chunk index and offset.
+37. Repair only the damaged chunk from a donor and confirm the capsule verifies again.
+38. Offer a hostile donor and a forged tree, and confirm both are refused without writing bytes.
 
-Pass condition: intact objects, valid signatures, same-author ancestry, exact planned rotations, retained local checkpoints, threshold recovery, and chunk commitments verify. Tested modifications, wrong parents, reused transitions, revoked signers, insufficient recovery approvals, unauthorized descendants, forged chunk proofs, and rollback to an old capsule are rejected. Trust is never inferred from an embedded public key, and unsigned root compatibility remains explicit.
+Pass condition: intact objects, valid signatures, same-author ancestry, exact planned rotations, retained local checkpoints, threshold recovery, chunk commitments, and verified repair all succeed. Tested modifications, wrong parents, reused transitions, revoked signers, insufficient recovery approvals, unauthorized descendants, forged chunk proofs, forged trees, hostile donors, and rollback to an old capsule are rejected. Trust is never inferred from an embedded public key, and unsigned root compatibility remains explicit.
 
 ## E1: Three-node LAN continuity
 

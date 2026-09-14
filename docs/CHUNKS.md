@@ -23,7 +23,9 @@ Chunk fields are part of the asset entry, so the capsule ID and the capsule sign
 
 Both fields are omitted together on capsules that predate this feature, so existing root capsule IDs stay identical. A manifest that declares one field without the other is rejected.
 
-`chunk_size` must be a power of two between 4096 bytes and 64 MiB. The default is 1 MiB. The chunk count is derived from the signed size, never taken from a proof.
+`chunk_size` must be a power of two between 4096 bytes and 64 MiB. The default is 64 KiB. The chunk count is derived from the signed size, never taken from a proof.
+
+A smaller default keeps possession challenges and repairs cheap, since both move one chunk rather than one file. The cost is more leaves per object, which matters only while a tree is held in memory: a 70 GB asset has about 1.1 million leaves at 64 KiB.
 
 ## Tree construction
 
@@ -75,10 +77,46 @@ arkmesh chunks check --proof FILE CAPSULE
 
 `check` needs only the capsule's manifest. A verifier that holds no objects can still confirm that a remote holder has one specific chunk.
 
+## Tree distribution
+
+A holder can export every leaf digest of one object:
+
+```json
+{
+  "schema_version": "arkmesh.chunk-tree/v0alpha1",
+  "capsule_id": "sha256:<digest>",
+  "asset_sha256": "<digest>",
+  "chunk_size": 65536,
+  "chunk_count": 6,
+  "chunk_root": "<digest>",
+  "leaves": ["<digest>", "..."]
+}
+```
+
+This file carries no signature and needs none. Verification recomputes the root from the leaves and compares it with the chunk root inside the signed manifest, so a forged or truncated tree is rejected. A tree is also rejected when the capsule ID, asset, chunk size, root, or leaf count disagrees with the signed manifest.
+
+## Damage localization and repair
+
+With an authenticated tree, a damaged replica reports exactly which chunks are wrong instead of only failing:
+
+```bash
+arkmesh chunks tree --asset DIGEST --out tree.json healthy.ark
+arkmesh chunks scan --tree tree.json damaged.ark
+arkmesh chunks repair --tree tree.json --source donor.bin damaged.ark
+```
+
+`scan` prints each damaged chunk index, byte offset, length, and whether the bytes were missing or mismatched, then exits nonzero.
+
+`repair` verifies every donor chunk against the authenticated tree BEFORE writing it, so a hostile donor cannot use repair as an injection path. After writing, the object is truncated to its signed size and the whole capsule is verified again. A donor that supplies a wrong chunk is refused and no bytes are written for it.
+
+## Parallel verification
+
+Objects are verified concurrently with a bounded worker pool, capped at four workers. Results are collected per asset and reported in manifest order, so the surfaced error is identical to sequential verification. A regression test repeats verification on a capsule with two damaged assets and requires the same asset to be reported every time.
+
 ## Limits
 
-- The chunk tree itself is not distributed yet, so a damaged replica cannot locate which chunk is wrong without proofs from a healthy source.
-- There is no erasure coding, so repair still requires a source that holds the missing bytes.
-- There is no peer protocol, so proofs are exchanged as files today.
-- A proof shows possession at one moment. It does not promise future retention.
+- The tree file lists every leaf, so it grows with object size. Range limited tree exchange is future work.
+- There is no erasure coding, so repair still requires a donor that holds the missing bytes.
+- There is no peer protocol, so trees and proofs are exchanged as files today.
+- A possession proof shows possession at one moment. It does not promise future retention, and nothing here measures retention over time.
 - Chunk verification reads the object, so repeated challenges on very large assets cost real disk bandwidth.

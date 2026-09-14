@@ -30,6 +30,9 @@ Read [The ArkMesh Promise](MANIFESTO.md) for the longer motivation and the proje
 - Record SHA-256 hashes, roles, file names, and sizes
 - Commit a Merkle chunk root per asset inside the signed manifest
 - Prove and verify possession of one exact chunk without holding the whole object
+- Locate the exact damaged chunks of a replica against an authenticated chunk tree
+- Repair only the damaged chunks, verifying every donor chunk before writing it
+- Verify independent objects in parallel with deterministic error reporting
 - Derive a deterministic capsule ID
 - Create local Ed25519 author identities
 - Sign capsules without placing private keys inside them
@@ -48,7 +51,8 @@ Read [The ArkMesh Promise](MANIFESTO.md) for the longer motivation and the proje
 
 - Distribution or organizational signing of revocation and recovery policies
 - Peer discovery and encrypted transfer
-- Resumable chunk exchange between peers and damage localization
+- Erasure coding, so repair still needs a donor holding the missing bytes
+- Measured retention over time rather than possession at one moment
 - Local model inference
 - Replay agreement across peers and divergent branch reconciliation
 - Erasure coding

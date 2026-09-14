@@ -25,6 +25,9 @@ These are release gates, not aspirations.
 5. Proof verification compares every restated field against the signed manifest.
 6. Sibling direction is derived from the index and level sizes, so proofs carry no direction bits.
 7. A possession proof carries real chunk bytes and proves possession only at that moment.
+8. A chunk tree file is authenticated by recomputing the signed root, never trusted because it was supplied.
+9. Repair verifies each donor chunk against the authenticated tree before writing it, and never writes unverified bytes.
+10. Parallel object verification reports the same asset as sequential verification.
 
 ## Authority
 
