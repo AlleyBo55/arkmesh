@@ -3,7 +3,7 @@ export function HeroMesh() {
     <figure
       className="hero-mesh"
       role="img"
-      aria-label="ArkMesh continuity map showing a lost publisher, four surviving shards, a fresh node, and required human authority"
+      aria-label="Conceptual ArkMesh continuity map showing a lost publisher, four proposed shard sources, a proposed recovery device, and required human authority"
     >
       <div className="hero-mesh-aura" aria-hidden="true" />
       <svg className="hero-mesh-svg" viewBox="0 0 640 640" aria-hidden="true">
@@ -67,17 +67,17 @@ export function HeroMesh() {
         <strong>04 / 06</strong>
       </div>
       <div className="mesh-label mesh-label-three">
-        <span>FRESH NODE</span>
-        <strong>WAITING</strong>
+        <span>RECOVERY DEVICE</span>
+        <strong>PROPOSED</strong>
       </div>
       <div className="mesh-label mesh-label-four">
         <span>AUTHORITY</span>
-        <strong>HUMAN</strong>
+        <strong>OPERATOR</strong>
       </div>
 
       <figcaption className="hero-mesh-caption">
-        <span className="hero-mesh-live">LIVE THESIS</span>
-        <span>NO SINGLE POINT OF FAILURE</span>
+        <span className="hero-mesh-live">CONCEPT DIAGRAM</span>
+        <span>DISTRIBUTED CONTINUITY: UNPROVEN</span>
         <span>PEER NETWORK: PLANNED</span>
       </figcaption>
     </figure>

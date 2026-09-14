@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 
-export const alt = "ArkMesh: verifiable offline AI capability preservation";
+export const alt = "ArkMesh: research prototype for verifiable local AI capsule recovery";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 

@@ -5,33 +5,33 @@ import { useEffect, useRef, useState } from "react";
 const chapters = [
   {
     depth: "000 M",
-    eyebrow: "00 / Surface",
-    title: "What if AI goes dark?",
-    body: "The internet fails. A useful model is withdrawn. Its original publisher disappears. What remains when one provider no longer answers?",
+    eyebrow: "00 / Dependency",
+    title: "What survives when access disappears?",
+    body: "A useful model that people are legally allowed to preserve can vanish from practical reach when its host, runtime, documentation, or trust evidence disappears. Downloading weights alone does not preserve the capability.",
   },
   {
     depth: "0240 M",
-    eyebrow: "01 / Origin lost",
-    title: "The source disappears.",
-    body: "ArkMesh starts where ordinary access ends: no cloud login, no central tracker, and no assumption that the original host will return.",
+    eyebrow: "01 / Complete object",
+    title: "Preserve everything needed to recover.",
+    body: "ArkMesh packages model files, tokenizer data, configuration, runtime requirements, knowledge, licenses, lineage, and recovery instructions into one verifiable capsule.",
   },
   {
     depth: "1800 M",
-    eyebrow: "02 / Surviving signal",
-    title: "Four pieces still answer.",
-    body: "The current local release proves an exact 8 MiB object can be reconstructed from four of six shards after the source and two shards are deleted.",
+    eyebrow: "02 / Current proof",
+    title: "Exact bytes can return from pieces.",
+    body: "The current release reconstructs an exact 8 MiB signed object from four of six shards after the publisher, complete object, and two shards are deleted.",
   },
   {
     depth: "4200 M",
-    eyebrow: "03 / The ark",
-    title: "Capability returns whole.",
-    body: "The ark is not a boat. It is a signed capsule carrying model files, runtime context, knowledge, licenses, lineage, and recovery instructions.",
+    eyebrow: "03 / Trust boundary",
+    title: "Recovery is accepted only after verification.",
+    body: "Digests, Merkle commitments, signatures, lineage rules, revocation policy, and retained checkpoints decide whether recovered bytes may become an accepted capsule.",
   },
   {
     depth: "6000 M",
-    eyebrow: "04 / Human authority",
-    title: "People decide what survives.",
-    body: "Peer seeding is still planned. Every future placement and execution must remain voluntary, inspectable, and explicitly authorized by device owners.",
+    eyebrow: "04 / Open experiment",
+    title: "The peer network must still be built.",
+    body: "ArkMesh does not yet discover peers or run models. The next experiment is consent-based encrypted recovery across independent devices without a central tracker.",
   },
 ] as const;
 
@@ -484,7 +484,7 @@ export function OceanJourney() {
               {index === chapters.length - 1 && (
                 <div className="ocean-actions">
                   <a href="/wiki#overview">Enter the archive</a>
-                  <a href="https://github.com/AlleyBo55/arkmesh" target="_blank" rel="noreferrer">Join the mission ↗</a>
+                  <a href="https://github.com/AlleyBo55/arkmesh/issues/new?template=research-proposal.yml" target="_blank" rel="noreferrer">Join the research ↗</a>
                 </div>
               )}
             </article>

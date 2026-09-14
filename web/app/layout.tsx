@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { AppProvider } from "@/components/app-provider";
+import { ArchiveChrome } from "@/components/archive-chrome";
 import "./globals.css";
 
 const publicOrigin = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "");
@@ -14,7 +15,7 @@ export const metadata: Metadata = {
     default: "ArkMesh",
     template: "%s | ArkMesh",
   },
-  description: "An open-source foundation project exploring how useful open AI can survive outages, withdrawn hosts, and infrastructure failure through verifiable, consent-based peer preservation.",
+  description: "A research prototype for content-addressed AI capsules, offline trust, authenticated repair, and donorless local reconstruction. Distributed peer continuity remains planned.",
   keywords: [
     "ArkMesh",
     "offline AI",
@@ -46,7 +47,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "ArkMesh",
-    description: "What if the internet goes down or a useful model disappears from its original host? Explore verifiable, consent-based peer preservation for open AI.",
+    description: "ArkMesh demonstrates signed local capsules, authenticated repair, and donorless reconstruction. It asks whether consenting peers can extend that evidence beyond one original host.",
     siteName: "ArkMesh",
     type: "website",
     locale: "en_US",
@@ -55,7 +56,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "ArkMesh",
-    description: "An open-source foundation project exploring how useful open AI can survive without one provider, network, or machine.",
+    description: "Local signed-capsule integrity, authenticated repair, and donorless reconstruction are implemented; distributed continuity is the open research question.",
   },
 };
 
@@ -73,7 +74,7 @@ const structuredData = {
   programmingLanguage: ["Go", "TypeScript"],
   runtimePlatform: "Linux, macOS",
   version: "0.1.0-alpha.1",
-  description: "An open-source foundation project researching verifiable, consent-based peer preservation for useful open AI capabilities.",
+  description: "Research prototype for content-addressed AI capsules, offline trust, authenticated repair, and donorless local reconstruction.",
   url: publicOrigin ?? repositoryUrl,
   codeRepository: repositoryUrl,
   license: "https://opensource.org/license/mit",
@@ -90,25 +91,24 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
         />
         <AppProvider>
           <div className="screen-shell">
-            <header className="sticky top-0 z-50 border-b border-white/10 bg-[#090b12]/80 backdrop-blur-xl">
-              <div className="content-grid flex min-h-14 items-center justify-between gap-2 py-1 text-xs font-black uppercase tracking-[0.1em] sm:gap-4 sm:py-2 sm:tracking-[0.12em]">
-                <Link href="/" className="flex min-h-11 items-center gap-3 text-white hover:text-cyan-200">
-                  <span className="border-2 border-cyan-300 px-2 py-1 text-cyan-200">AM</span>
-                  <span className="hidden sm:inline">ArkMesh</span>
-                  <span className="sr-only">ArkMesh home</span>
-                </Link>
-                <nav className="flex items-center gap-1 sm:gap-3 md:gap-5" aria-label="Primary navigation">
-                  <Link href="/" className="flex min-h-11 items-center px-1 text-blue-200 hover:text-white sm:px-2">[Home]</Link>
-                  <Link href="/wiki" className="flex min-h-11 items-center px-1 text-blue-200 hover:text-white sm:px-2">[Wiki]</Link>
-                  <a href={repositoryUrl} target="_blank" rel="noreferrer" className="flex min-h-11 items-center px-1 text-cyan-200 hover:text-white sm:px-2">[Source]</a>
-                </nav>
-              </div>
-            </header>
+            <ArchiveChrome repositoryUrl={repositoryUrl} />
             {children}
-            <footer className="mt-20 border-t border-white/10 bg-[#080a11] py-8 md:mt-24">
-              <div className="content-grid flex flex-col justify-between gap-4 text-xs uppercase tracking-[0.1em] text-blue-300 md:flex-row">
-                <p>ArkMesh v0alpha1 // research prototype // MIT</p>
-                <p>Networking and inference are not implemented.</p>
+            <footer className="archive-footer">
+              <div className="content-grid archive-footer-grid">
+                <div>
+                  <p className="archive-footer-label">ArkMesh // Open continuity research</p>
+                  <h2>Preserve the evidence.<br />Challenge the thesis.</h2>
+                </div>
+                <div className="archive-footer-links">
+                  <Link href="/wiki">Read the thesis</Link>
+                  <Link href="/wiki#evidence">Inspect evidence</Link>
+                  <Link href="/learn">Run the field guide</Link>
+                  <a href={repositoryUrl} target="_blank" rel="noreferrer">View source ↗</a>
+                </div>
+              </div>
+              <div className="content-grid archive-footer-status">
+                <p>v0alpha1 · MIT · research prototype</p>
+                <p><span />Peer networking and inference remain unimplemented.</p>
               </div>
             </footer>
           </div>

@@ -2,7 +2,7 @@
 
 ## Mission
 
-Preserve humanity's ability to run, understand, and peacefully govern useful open AI after severe infrastructure failure, without dependence on any single organization, global network, or machine.
+Preserve humanity's ability to run, understand, and peacefully govern AI capabilities people are legally allowed to possess after severe infrastructure failure, without dependence on any single organization, global network, or machine.
 
 ## Intended beneficiary
 
