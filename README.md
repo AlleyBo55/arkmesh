@@ -33,6 +33,8 @@ Read [The ArkMesh Promise](MANIFESTO.md) for the longer motivation and the proje
 - Locate the exact damaged chunks of a replica against an authenticated chunk tree
 - Repair only the damaged chunks, verifying every donor chunk before writing it
 - Rebuild a lost object from Reed Solomon shards with no donor holding its bytes
+- Bound how much of a replica can be missing, by random sampling with stated confidence
+- Record an audit history so retention is observed rather than assumed
 - Verify independent objects in parallel with deterministic error reporting
 - Derive a deterministic capsule ID
 - Create local Ed25519 author identities
@@ -54,6 +56,7 @@ Read [The ArkMesh Promise](MANIFESTO.md) for the longer motivation and the proje
 - Peer discovery and encrypted transfer
 - Shard placement, repair scheduling, and replica health metrics
 - Measured retention over time rather than possession at one moment
+- Independently attested time, so retention logs rely on local clocks
 - Local model inference
 - Replay agreement across peers and divergent branch reconciliation
 - Recovery dashboard
@@ -180,6 +183,7 @@ Read the full [threat model](docs/THREAT_MODEL.md).
 - [Capsule Protocol](docs/PROTOCOL.md): current capsule, signature, and lineage format
 - [Chunk Commitments](docs/CHUNKS.md): Merkle chunk roots and possession proofs
 - [Erasure Coding](docs/ERASURE.md): Reed Solomon shards and donorless recovery
+- [Sampled Audits](docs/AUDIT.md): retrievability bounds, confidence, and retention history
 - [Key Authority and Revocation](docs/AUTHORITY.md): exact planned rotations and local rejection policy
 - [Threshold Emergency Recovery](docs/RECOVERY.md): independent approvals and exact recovery edges
 - [Local Lineage Checkpoints](docs/CHECKPOINTS.md): accepted heads, direct advancement, and rollback limits
