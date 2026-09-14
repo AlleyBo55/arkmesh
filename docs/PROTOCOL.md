@@ -34,11 +34,15 @@ A root capsule omits `parent_capsule_id`. A descendant includes the exact capsul
       "role": "model",
       "name": "model.gguf",
       "size": 1234,
-      "sha256": "<digest>"
+      "sha256": "<digest>",
+      "chunk_size": 1048576,
+      "chunk_root": "<digest>"
     }
   ]
 }
 ```
+
+`chunk_size` and `chunk_root` are omitted together on capsules packed before chunk commitments existed, which preserves their exact capsule IDs. When present they are covered by the capsule ID and therefore by the signature. See [Chunk Commitments and Possession Proofs](CHUNKS.md) for the exact leaf and node bytes, the unpaired node rule, and the proof format.
 
 The capsule ID is SHA-256 over the compact JSON representation of the manifest with `capsule_id` set to an empty string. `parent_capsule_id` is omitted from root JSON, which preserves existing root capsule IDs. For descendants, the parent ID is included in the digest and therefore covered by the capsule signature.
 
@@ -142,7 +146,7 @@ After object and manifest integrity checks, verification reports one of three su
 - `valid_unknown_author`: the signature is valid, but the signer is absent from the supplied trust set
 - `valid_trusted_author`: the signature is valid and exactly matches a supplied public identity
 
-Verification fails for unknown, duplicate, or trailing manifest fields; malformed envelopes; unsupported schemas or algorithms; changed capsule IDs; invalid key fingerprints; invalid key lengths; symlink or nonregular objects; invalid signatures; or a missing trusted signer when strict trust is required.
+Verification fails for unknown, duplicate, or trailing manifest fields; malformed envelopes; unsupported schemas or algorithms; changed capsule IDs; invalid key fingerprints; invalid key lengths; symlink or nonregular objects; invalid signatures; a chunk root, chunk count, or chunk size that disagrees with stored bytes; or a missing trusted signer when strict trust is required.
 
 A valid trusted signature proves control of the signing private key for that capsule ID. It does not prove content safety, factual accuracy, license compliance, or the human identity behind the key.
 

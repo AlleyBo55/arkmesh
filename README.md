@@ -28,6 +28,8 @@ Read [The ArkMesh Promise](MANIFESTO.md) for the longer motivation and the proje
 
 - Pack local files into a content addressed capsule
 - Record SHA-256 hashes, roles, file names, and sizes
+- Commit a Merkle chunk root per asset inside the signed manifest
+- Prove and verify possession of one exact chunk without holding the whole object
 - Derive a deterministic capsule ID
 - Create local Ed25519 author identities
 - Sign capsules without placing private keys inside them
@@ -46,7 +48,7 @@ Read [The ArkMesh Promise](MANIFESTO.md) for the longer motivation and the proje
 
 - Distribution or organizational signing of revocation and recovery policies
 - Peer discovery and encrypted transfer
-- Resumable chunk exchange
+- Resumable chunk exchange between peers and damage localization
 - Local model inference
 - Replay agreement across peers and divergent branch reconciliation
 - Erasure coding
@@ -172,6 +174,7 @@ Read the full [threat model](docs/THREAT_MODEL.md).
 - [Research Charter](CHARTER.md): mission, definitions, hypothesis, and limits
 - [Threat Model](docs/THREAT_MODEL.md): assets, trust boundaries, attacks, and propagation limits
 - [Capsule Protocol](docs/PROTOCOL.md): current capsule, signature, and lineage format
+- [Chunk Commitments](docs/CHUNKS.md): Merkle chunk roots and possession proofs
 - [Key Authority and Revocation](docs/AUTHORITY.md): exact planned rotations and local rejection policy
 - [Threshold Emergency Recovery](docs/RECOVERY.md): independent approvals and exact recovery edges
 - [Local Lineage Checkpoints](docs/CHECKPOINTS.md): accepted heads, direct advancement, and rollback limits
