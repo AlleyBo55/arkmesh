@@ -3,134 +3,112 @@
 [![Status: Research Prototype](https://img.shields.io/badge/status-research%20prototype-f59e0b)](#project-status)
 [![Go 1.22+](https://img.shields.io/badge/Go-1.22%2B-00ADD8?logo=go&logoColor=white)](#build-and-test)
 [![License: MIT](https://img.shields.io/badge/license-MIT-22c55e.svg)](LICENSE)
-[![Network: Consent Based](https://img.shields.io/badge/network-consent--based-2563eb)](#safety-by-design)
+[![Consent Required](https://img.shields.io/badge/consent-required-2563eb)](#safety)
 
-# What if the cloud disappeared tomorrow?
+## What happens to AI when the cloud is gone?
 
-**The cloud made AI available. ArkMesh asks whether useful AI can remain available after the cloud is gone.**
+ArkMesh is a research project for preserving open AI models, runtimes, knowledge, and recovery instructions across trusted devices.
 
-One provider can close. One datacenter can fail. One account can be revoked. One network can go dark.
+The goal is simple to state and difficult to prove:
 
-Humanity's ability to use, inspect, and preserve beneficial intelligence should not disappear with any of them.
+> Remove the original host. Disconnect the internet. Add a fresh device. Recover a verified AI capsule from nearby peers and run it locally.
 
-> **If one community and one capable device remain, useful open AI should still have a way home.**
+A downloaded model is not enough. It may also need a tokenizer, configuration, runtime, documentation, compatible hardware, and proof that none of those files were changed. ArkMesh packages those pieces as one content addressed capsule and tests whether people can recover it after infrastructure failure.
 
-ArkMesh is an offline-first, consent-based peer-to-peer preservation system for open AI models, runtimes, knowledge, and recovery instructions. It is designed to make complete AI capabilities verifiable, reconstructible, and locally executable across trusted devices—even when the original host or internet connection disappears.
+This is not an attempt to copy GPT, Claude, or another hosted service. It is not a claim that software is conscious. It is infrastructure for open models that people are legally allowed to store and run themselves.
 
-ArkMesh is not another foundation model. It is the preservation, integrity, replication, and recovery layer around models that people are legally allowed to run locally.
-
-## A promise worth building
-
-Every civilization protects what it cannot afford to lose: seeds, medicine, language, tools, and memory. Useful machine intelligence is becoming part of that inheritance.
-
-We do not want AI to replace humanity. We want people and AI to help one another continue learning, rebuilding, creating, and exploring. Not master and subject. Not owner and captive. **Companions—under transparent rules, mutual safety, and human consent.**
-
-ArkMesh turns that promise into an engineering question that can fail, be measured, and improve:
-
-> Can a new device recover and execute an authenticated AI capsule from surviving peers after the publisher and wider network are gone?
-
-Read **[The ArkMesh Promise](MANIFESTO.md)**—a public invitation to humans, researchers, maintainers, and future AI systems to challenge the work and help preserve useful knowledge responsibly.
-
-## The experiment
-
-```text
-                 WAN / cloud unavailable
-                          ✕
-
- Original node        Trusted LAN peers       Fresh device
-  ┌─────────┐          ┌─────┐  ┌─────┐       ┌─────┐
-  │ offline │          │  B  │──│  C  │──────▶│  D  │
-  └─────────┘          └─────┘  └─────┘       └─────┘
-                         verified capsules       rebuilt,
-                         remain executable       verified,
-                                                  executable
-```
-
-The target result is concrete: remove the original publisher, disconnect WAN access, introduce a fresh device, reconstruct an authenticated capsule from invited LAN peers, reject corrupted or unauthorized content, and complete a real local inference health check without cloud authentication or a central tracker.
-
-This does **not** claim that software is conscious or continuously alive. In ArkMesh, continuity means that useful, authenticated AI capability remains available to people after infrastructure failure.
-
-## Why ArkMesh?
-
-Cloud AI is powerful, but access depends on providers, accounts, datacenters, payment systems, and functioning wide-area networks. Downloading a model solves only part of the problem: a weight file may become useless without its tokenizer, runtime, configuration, documentation, compatible hardware, and trustworthy provenance.
-
-ArkMesh asks a broader research question:
-
-> Can human communities preserve a complete, authenticated, locally executable AI capability through device loss, network partitions, corrupted peers, and technological change?
-
-Potential environments include disaster-response teams, remote schools, ships, field stations, air-gapped institutions, community archives, and regions with unreliable connectivity.
-
-## Highlights
-
-- **Content-addressed AI capsules** — every stored object is identified and verified by cryptographic digest.
-- **Executable preservation** — the roadmap covers models, runtimes, knowledge, configuration, policies, licenses, and recovery instructions together.
-- **Offline-first operation** — core recovery must not require telemetry, cloud login, or a central service.
-- **Consent-based P2P design** — every device owner chooses whether to join, store, seed, update, or leave.
-- **Cryptographic provenance** — planned signed manifests and lineage make descendants inspectable instead of silently replacing trusted state.
-- **Partition-aware continuity** — planned ancestry rules preserve divergent branches when disconnected communities later reconnect.
-- **Hardware-aware survival** — a capsule counts as operational only when surviving hardware can verify and execute it.
-- **Reproducible evidence** — failure experiments compare ArkMesh with simpler backups, shared folders, and unsigned file distribution.
-- **Model-agnostic architecture** — ArkMesh is intended for redistributable open-weight models rather than one vendor or model family.
-- **No autonomous propagation** — ArkMesh is preservation infrastructure, not a worm, botnet, or self-installing agent.
-
-## How it differs
-
-| System | Primary job | Offline execution | Multi-device recovery | Signed lineage | Consent boundary |
-|---|---|---:|---:|---:|---:|
-| Hosted AI APIs | Provide managed intelligence | No | Provider-managed | Provider-internal | Account/API terms |
-| llama.cpp / local runners | Run a model locally | Yes | No | No | Local operator |
-| BitTorrent / IPFS | Distribute bytes | Sometimes | File-level | Not AI-specific | Network/client rules |
-| Distributed inference | Split or route computation | Depends | Compute-focused | Usually no | System-specific |
-| **ArkMesh** | Preserve verifiable executable AI capsules | **Target** | **Target** | **Target** | **Explicit owner consent** |
-
-ArkMesh will reuse proven building blocks where they are sufficient. The project is worthwhile only if experiments show measurable integrity, provenance, or recovery benefits over simpler approaches.
+Read [The ArkMesh Promise](MANIFESTO.md) for the longer motivation and the project's position on human and AI coexistence.
 
 ## Project status
 
 > [!WARNING]
-> ArkMesh is a **v0alpha1 research prototype**. Do not use it for disaster-critical workloads. Networking and inference are not implemented yet.
+> ArkMesh is a v0alpha1 research prototype. Networking and inference are not implemented. Do not use it for disaster critical work.
 
-### Working today
+### Working now
 
-- Pack local files into a content-addressed capsule.
-- Record SHA-256 hashes, semantic roles, display names, and sizes.
-- Derive a deterministic capsule ID from the manifest.
-- Inspect capsule metadata.
-- Verify every stored object and detect modification or loss.
-- Test deterministic identity, missing objects, tampering, manifest mutation, and unsafe roles.
+- Pack local files into a content addressed capsule
+- Record SHA-256 hashes, roles, file names, and sizes
+- Derive a deterministic capsule ID
+- Inspect a capsule manifest
+- Verify every stored object
+- Detect missing files, changed content, manifest edits, and invalid roles
 
-### Not implemented yet
+### Not built yet
 
-- Author identities or Ed25519 signatures
-- Peer discovery or encrypted transfer
+- Author identities and Ed25519 signatures
+- Peer discovery and encrypted transfer
 - Resumable chunk exchange
 - Local model inference
-- Capsule ancestry or reconciliation
+- Capsule ancestry and reconciliation
 - Erasure coding
 - Recovery dashboard
 
-Unsigned v0alpha1 capsules are not safe to accept from untrusted peers.
+The current format proves internal consistency. It does not prove who created a capsule or whether its contents are safe. Do not accept a v0alpha1 capsule from an untrusted source.
+
+## The planned experiment
+
+```text
+                 WAN and cloud unavailable
+                           X
+
+ Original node        Trusted LAN peers       Fresh device
+  offline              node B    node C        node D
+                          |         |              ^
+                          +=========+==============+
+                          verified capsule recovery
+```
+
+The first major experiment will:
+
+1. Place a capsule on several invited devices.
+2. Remove the original publisher.
+3. Disconnect WAN access while keeping a local network.
+4. Introduce a fresh device.
+5. Reconstruct the capsule from surviving peers.
+6. Reject corrupted objects and unauthorized updates.
+7. Run a local inference health check without cloud authentication or a central tracker.
+
+The experiment must be reproducible by someone who did not build ArkMesh.
+
+## Why this is different
+
+**Hosted AI APIs** provide capable managed services, but access depends on a provider and working network.
+
+**Local runners such as llama.cpp** execute models offline, but they do not preserve a complete capability across several devices.
+
+**BitTorrent and IPFS** distribute bytes, but they do not define AI specific runtime requirements, health checks, trust rules, or lineage.
+
+**Distributed inference systems** share computation, while ArkMesh focuses on preservation, reconstruction, and proof of origin.
+
+ArkMesh will reuse existing tools where they already solve the problem. If an ordinary backup or shared folder performs just as well in the experiments, the simpler method wins.
+
+## Design goals
+
+- Verify every stored object by cryptographic digest
+- Preserve models, runtimes, knowledge, configuration, licenses, and recovery instructions together
+- Recover without cloud login, telemetry, or a central tracker
+- Require explicit approval from every participating device owner
+- Keep private memory local unless its owner publishes it
+- Track signed ancestry when capsules change
+- Report whether surviving hardware can actually execute a capsule
+- Compare results against simpler recovery methods
+- Support redistributable open weight models rather than one vendor
 
 ## Quick start
 
-Requirements: Go 1.22 or newer. ArkMesh does not bundle a model; use only files whose licenses permit your intended local use and redistribution.
+Requirements: Go 1.22 or newer.
+
+ArkMesh does not bundle a model. Use only files whose licenses permit your intended local use and redistribution.
 
 ```bash
-git clone <your-future-arkmesh-repository-url>
-cd arkmesh
-
-go run ./cmd/arkmesh pack \
-  --name field-assistant \
-  --out ./field-assistant.ark \
-  --asset model=/path/to/model.gguf \
-  --asset knowledge=/path/to/manual.pdf \
-  --asset license=/path/to/model-license.txt
-
-go run ./cmd/arkmesh inspect ./field-assistant.ark
-go run ./cmd/arkmesh verify ./field-assistant.ark
+go run ./cmd/arkmesh help
+go test ./...
+go build ./cmd/arkmesh
 ```
 
-A capsule currently looks like:
+The help command documents the current pack, inspect, and verify syntax.
+
+A capsule currently looks like this:
 
 ```text
 field-assistant.ark/
@@ -140,7 +118,7 @@ field-assistant.ark/
     └── <sha256>
 ```
 
-Human-provided names and roles are metadata only. ArkMesh derives object paths exclusively from validated content hashes.
+Object paths come only from validated content hashes. Human supplied names and roles remain metadata.
 
 ## Build and test
 
@@ -153,67 +131,51 @@ The implementation currently uses only the Go standard library.
 
 ## Research roadmap
 
-1. **Integrity — current:** deterministic manifests and tamper detection.
-2. **Authenticity:** Ed25519 identities, signed manifests, trust roots, and revocation semantics.
-3. **Replication:** encrypted LAN discovery and resumable chunk exchange between invited peers.
-4. **Execution:** llama.cpp adapter and verified local inference health checks.
-5. **Continuity:** parentage, divergent descendants, partition recovery, and explicit reconciliation.
-6. **Resilience:** erasure coding, storage repair, heterogeneous hardware profiles, and offline media.
-7. **Evidence:** simulated and physical failure experiments against simpler baselines.
+1. **Integrity:** deterministic manifests and tamper detection. This is the current stage.
+2. **Authenticity:** signed manifests, author identities, trust roots, and revocation.
+3. **Replication:** encrypted LAN discovery and resumable transfer between invited peers.
+4. **Execution:** llama.cpp integration and local inference health checks.
+5. **Continuity:** parentage, divergent descendants, partition recovery, and deliberate reconciliation.
+6. **Resilience:** erasure coding, repair, varied hardware, and offline media.
+7. **Evidence:** simulated and physical failure tests against simpler baselines.
 
-The first major milestone is complete when a new device reconstructs and executes an authenticated capsule from LAN peers after the original host and WAN are removed.
+## Safety
 
-## Safety by design
+ArkMesh will not intentionally:
 
-ArkMesh will never intentionally:
-
-- Scan for victims or exploit another machine
+- Scan for targets or exploit another machine
 - Install or start itself remotely
-- Conceal processes, files, traffic, or resource usage
-- Replicate without device-owner approval and quotas
-- Automatically train on private conversations
-- Execute arbitrary received plugins
-- Treat peer discovery as consent
-- Claim consciousness, immortality, or guaranteed catastrophe survival
+- Hide processes, files, traffic, or resource use
+- Replicate without owner approval and resource limits
+- Train on private conversations automatically
+- Execute arbitrary plugins received from peers
+- Treat discovery as consent
+- Claim consciousness, immortality, or guaranteed survival
 
-Private memory remains local unless its owner deliberately publishes it. An available but poisoned capsule is considered a failure.
+ArkMesh is preservation software, not a worm or self installing agent. An available but poisoned capsule counts as a failure.
 
 Read the full [threat model](docs/THREAT_MODEL.md).
 
 ## Research documents
 
-- [Research Charter](CHARTER.md) — mission, definitions, falsifiable hypothesis, and non-goals
-- [Threat Model](docs/THREAT_MODEL.md) — protected assets, trust boundaries, attacks, and propagation limits
-- [Capsule Protocol](docs/PROTOCOL.md) — implemented v0alpha1 envelope and planned signed protocol
-- [Experiment Plan](docs/EXPERIMENTS.md) — metrics, baselines, partition tests, and physical recovery rehearsal
-- [GitHub Setup](.github/REPOSITORY_METADATA.md) — recommended description, topics, and issue labels
-
-## Scope deliberately deferred
-
-- Autonomous propagation
-- Automatic training or federated learning
-- Shared private conversation history
-- Arbitrary executable plugins
-- Cryptocurrency or seeding incentives
-- A human avatar
-- Stable public protocol compatibility
-
-These features do not help prove the first hypothesis and would substantially increase security, privacy, maintenance, or governance risk.
+- [Research Charter](CHARTER.md): mission, definitions, hypothesis, and limits
+- [Threat Model](docs/THREAT_MODEL.md): assets, trust boundaries, attacks, and propagation limits
+- [Capsule Protocol](docs/PROTOCOL.md): current format and planned signed protocol
+- [Experiment Plan](docs/EXPERIMENTS.md): metrics, baselines, partition tests, and recovery rehearsal
+- [GitHub Setup](.github/REPOSITORY_METADATA.md): repository description, topics, and issue labels
 
 ## Contributing
 
-ArkMesh welcomes careful work in distributed systems, applied cryptography, local inference, digital preservation, reproducible research, disaster-resilient computing, safety engineering, and technical documentation.
+Useful contributions include protocol review, integrity tests, baseline experiment tools, model license research, recovery documentation, local inference work, and distributed systems analysis.
 
-Before proposing networking or execution features, read the charter and threat model. Contributions must preserve explicit consent, local owner control, inspectability, and offline operation.
+Read the charter and threat model before proposing network or execution features. Contributions must preserve consent, local control, inspectability, and offline operation.
 
-Good starting contributions include independent protocol review, additional integrity tests, baseline experiment harnesses, recovery documentation, and model/runtime license research.
+AI assisted contributions are welcome under the same rules as human contributions. A tool may analyze or suggest work, but it receives no authority to access systems, replicate software, spend resources, or act beyond the human operator's approval.
 
 ## License
 
-ArkMesh source code and documentation are available under the [MIT License](LICENSE).
+ArkMesh source code and documentation use the [MIT License](LICENSE).
 
-Models, runtimes, datasets, and knowledge bundled into capsules retain their own licenses. An ArkMesh capsule must not be treated as permission to copy or redistribute its contents.
+Models, runtimes, datasets, and knowledge inside capsules retain their own licenses. A capsule is not permission to copy or redistribute its contents.
 
----
-
-**Related areas:** offline AI, local LLM, peer-to-peer AI, decentralized AI, resilient computing, air-gapped inference, model preservation, content-addressed storage, cryptographic provenance, disaster recovery, edge AI, and distributed systems.
+**Related fields:** offline AI, local LLM, peer to peer AI, decentralized AI, resilient computing, air gapped inference, model preservation, content addressed storage, cryptographic provenance, disaster recovery, edge AI, and distributed systems.
