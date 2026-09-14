@@ -64,7 +64,7 @@ Crossing this boundary would make the system worm-like and invalidate the projec
 
 ## v0alpha1 limitations
 
-The current implementation verifies SHA-256 object integrity, optional Ed25519 capsule signatures, and same-author parent to child lineage. Trust roots and parent capsules are supplied manually for each verification. It does not provide revocation, key rotation, delegated update authority, branch reconciliation, encrypted transfer, peer authentication, model execution, or legal identity proof. A valid signature proves control of a private key for one capsule ID, not safety, truth, license compliance, or authorization to execute its contents.
+The current implementation verifies SHA-256 object integrity, Ed25519 capsule signatures, same-author lineage, exact parent-signed key rotations, and local operator revocation policies. Trust roots, parent capsules, and revocation files are supplied manually for each verification. It does not provide emergency recovery after old-key loss, organizational revocation signatures, replay-resistant sequence rules, branch reconciliation, encrypted transfer, peer authentication, model execution, or legal identity proof. A valid transition proves that the parent key authorized one child key for one lineage edge. It does not prove safety, truth, license compliance, or authorization to execute capsule contents.
 
 ## Out of scope
 

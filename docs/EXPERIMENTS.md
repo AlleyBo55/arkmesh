@@ -43,8 +43,13 @@ Status: implemented in the reference CLI and automated tests.
 13. Supply a different parent and confirm verification fails.
 14. Sign a child with another identity and confirm update authority fails.
 15. Remove the parent signature and confirm lineage verification fails.
+16. Create a new author key and an exact rotation transition signed by the parent key.
+17. Trust only the parent key and confirm the rotated child verifies through inherited lineage trust.
+18. Copy the transition to another child and confirm verification fails.
+19. Modify the transition signature and confirm verification fails.
+20. Add the child key to a local revocation policy and confirm verification fails.
 
-Pass condition: intact objects, valid signatures, and same-author ancestry verify. Tested modifications, wrong parents, and unauthorized descendants are rejected. Trust is never inferred from an embedded public key, and unsigned root compatibility remains explicit.
+Pass condition: intact objects, valid signatures, same-author ancestry, and exact planned rotations verify. Tested modifications, wrong parents, reused transitions, revoked signers, and unauthorized descendants are rejected. Trust is never inferred from an embedded public key, and unsigned root compatibility remains explicit.
 
 ## E1: Three-node LAN continuity
 

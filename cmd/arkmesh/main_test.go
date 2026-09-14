@@ -123,3 +123,90 @@ func TestLineageWorkflow(t *testing.T) {
 		t.Fatalf("lineage verify stdout = %q, want verified lineage", stdout.String())
 	}
 }
+
+func TestKeyRotationAndRevocationWorkflow(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	oldIdentity := filepath.Join(root, "old-author")
+	newIdentity := filepath.Join(root, "new-author")
+	parentDirectory := filepath.Join(root, "parent.ark")
+	childDirectory := filepath.Join(root, "child.ark")
+	parentAsset := filepath.Join(root, "parent.gguf")
+	childAsset := filepath.Join(root, "child.gguf")
+	revocationsPath := filepath.Join(root, "revocations.json")
+	if err := os.WriteFile(parentAsset, []byte("parent model"), 0o644); err != nil {
+		t.Fatalf("write parent fixture: %v", err)
+	}
+	if err := os.WriteFile(childAsset, []byte("rotated child model"), 0o644); err != nil {
+		t.Fatalf("write child fixture: %v", err)
+	}
+
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+	for _, directory := range []string{oldIdentity, newIdentity} {
+		stdout.Reset()
+		stderr.Reset()
+		if code := run([]string{"identity", "create", "--out", directory}, &stdout, &stderr); code != 0 {
+			t.Fatalf("identity create %q code = %d, stderr = %q", directory, code, stderr.String())
+		}
+	}
+	oldPrivate := filepath.Join(oldIdentity, "identity.key")
+	oldPublic := filepath.Join(oldIdentity, "identity.json")
+	newPrivate := filepath.Join(newIdentity, "identity.key")
+	newPublic := filepath.Join(newIdentity, "identity.json")
+
+	stdout.Reset()
+	stderr.Reset()
+	if code := run([]string{
+		"pack", "--name", "parent", "--out", parentDirectory,
+		"--asset", "model=" + parentAsset,
+		"--signing-key", oldPrivate,
+	}, &stdout, &stderr); code != 0 {
+		t.Fatalf("parent pack code = %d, stderr = %q", code, stderr.String())
+	}
+
+	stdout.Reset()
+	stderr.Reset()
+	if code := run([]string{
+		"pack", "--name", "rotated-child", "--out", childDirectory,
+		"--asset", "model=" + childAsset,
+		"--signing-key", newPrivate,
+		"--parent", parentDirectory,
+		"--rotation-key", oldPrivate,
+	}, &stdout, &stderr); code != 0 {
+		t.Fatalf("rotated child pack code = %d, stderr = %q", code, stderr.String())
+	}
+	if !strings.Contains(stdout.String(), "key rotation: ed25519:") {
+		t.Fatalf("rotated child stdout = %q, want key rotation", stdout.String())
+	}
+
+	stdout.Reset()
+	stderr.Reset()
+	if code := run([]string{
+		"verify", "--trust", oldPublic, "--require-trusted",
+		"--parent", parentDirectory, "--require-lineage", childDirectory,
+	}, &stdout, &stderr); code != 0 {
+		t.Fatalf("rotated verify code = %d, stderr = %q", code, stderr.String())
+	}
+	if !strings.Contains(stdout.String(), "lineage: verified_key_rotation") {
+		t.Fatalf("rotated verify stdout = %q, want key rotation lineage", stdout.String())
+	}
+
+	stdout.Reset()
+	stderr.Reset()
+	if code := run([]string{
+		"identity", "revoke", "--identity", newPublic, "--out", revocationsPath,
+	}, &stdout, &stderr); code != 0 {
+		t.Fatalf("identity revoke code = %d, stderr = %q", code, stderr.String())
+	}
+
+	stdout.Reset()
+	stderr.Reset()
+	if code := run([]string{
+		"verify", "--trust", oldPublic, "--require-trusted",
+		"--revocations", revocationsPath,
+		"--parent", parentDirectory, "--require-lineage", childDirectory,
+	}, &stdout, &stderr); code == 0 || !strings.Contains(stderr.String(), "revoked by local policy") {
+		t.Fatalf("revoked verify code = %d, stderr = %q, want revocation rejection", code, stderr.String())
+	}
+}
