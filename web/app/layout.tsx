@@ -90,7 +90,7 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
         />
         <AppProvider>
           <div className="screen-shell">
-            <header className="sticky top-0 z-50 border-b-2 border-cyan-300/80 bg-[#000a46]/95 backdrop-blur-sm">
+            <header className="sticky top-0 z-50 border-b border-white/10 bg-[#090b12]/80 backdrop-blur-xl">
               <div className="content-grid flex min-h-14 items-center justify-between gap-2 py-1 text-xs font-black uppercase tracking-[0.1em] sm:gap-4 sm:py-2 sm:tracking-[0.12em]">
                 <Link href="/" className="flex min-h-11 items-center gap-3 text-white hover:text-cyan-200">
                   <span className="border-2 border-cyan-300 px-2 py-1 text-cyan-200">AM</span>
@@ -105,7 +105,7 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
               </div>
             </header>
             {children}
-            <footer className="mt-20 border-t-2 border-cyan-300/50 bg-[#000735] py-8 md:mt-24">
+            <footer className="mt-20 border-t border-white/10 bg-[#080a11] py-8 md:mt-24">
               <div className="content-grid flex flex-col justify-between gap-4 text-xs uppercase tracking-[0.1em] text-blue-300 md:flex-row">
                 <p>ArkMesh v0alpha1 // research prototype // MIT</p>
                 <p>Networking and inference are not implemented.</p>

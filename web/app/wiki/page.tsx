@@ -59,7 +59,7 @@ export default function WikiPage() {
               {section.id === "roadmap" ? (
                 <div className="mt-9 grid gap-3 md:grid-cols-2">
                   {plannedCapabilities.map((item) => (
-                    <article key={item.id} className="border border-cyan-300/35 bg-[#00105d] p-5">
+                    <article key={item.id} className="border border-cyan-300/35 bg-[#121621] p-5">
                       <div className="flex items-center justify-between gap-4"><span className="text-xs uppercase text-blue-300">{item.id}</span><span className="status-label text-amber-300">Planned</span></div>
                       <h3 className="mt-5 text-lg font-black uppercase text-white">{item.title}</h3>
                       <p className="mt-3 text-sm leading-6 text-blue-100">{item.summary}</p>
