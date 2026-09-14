@@ -1,6 +1,7 @@
 package capsule
 
 import (
+	"bytes"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
@@ -114,8 +115,14 @@ func Load(root string) (Manifest, error) {
 		return Manifest{}, fmt.Errorf("read manifest: %w", err)
 	}
 	defer file.Close()
-
-	decoder := json.NewDecoder(file)
+	data, err := io.ReadAll(file)
+	if err != nil {
+		return Manifest{}, fmt.Errorf("read manifest: %w", err)
+	}
+	if err := rejectDuplicateJSONKeys(data); err != nil {
+		return Manifest{}, fmt.Errorf("decode manifest: %w", err)
+	}
+	decoder := json.NewDecoder(bytes.NewReader(data))
 	decoder.DisallowUnknownFields()
 	var manifest Manifest
 	if err := decoder.Decode(&manifest); err != nil {

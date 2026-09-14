@@ -186,3 +186,15 @@ func TestVerifyRejectsSymlinkObject(t *testing.T) {
 		t.Fatalf("Verify() error = %v, want non-regular object", err)
 	}
 }
+
+func TestLoadRejectsDuplicateManifestField(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	data := `{"schema_version":"arkmesh.capsule/v0alpha1","capsule_id":"sha256:` + strings.Repeat("0", 64) + `","name":"first","name":"second","created_at":"2026-09-14T00:00:00Z","assets":[]}`
+	if err := os.WriteFile(filepath.Join(root, "manifest.json"), []byte(data), 0o644); err != nil {
+		t.Fatalf("write manifest: %v", err)
+	}
+	if _, err := Load(root); err == nil || !strings.Contains(err.Error(), "duplicate JSON field") {
+		t.Fatalf("Load() error = %v, want duplicate field rejection", err)
+	}
+}

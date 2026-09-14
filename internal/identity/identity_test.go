@@ -101,3 +101,15 @@ func TestLoadPrivateRejectsMismatchedPublicKey(t *testing.T) {
 		t.Fatalf("LoadPrivate() error = %v, want public/private mismatch", err)
 	}
 }
+
+func TestLoadPublicRejectsDuplicateField(t *testing.T) {
+	t.Parallel()
+	path := filepath.Join(t.TempDir(), "identity.json")
+	data := `{"schema_version":"arkmesh.identity/v0alpha1","algorithm":"ed25519","algorithm":"other","key_id":"ed25519:` + strings.Repeat("0", 64) + `","public_key":""}`
+	if err := os.WriteFile(path, []byte(data), 0o644); err != nil {
+		t.Fatalf("write identity: %v", err)
+	}
+	if _, err := LoadPublic(path); err == nil || !strings.Contains(err.Error(), "duplicate JSON field") {
+		t.Fatalf("LoadPublic() error = %v, want duplicate field rejection", err)
+	}
+}

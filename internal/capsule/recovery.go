@@ -357,6 +357,9 @@ func loadStrictRegularJSON(path string, value any, description string) error {
 	if err != nil {
 		return fmt.Errorf("read %s: %w", description, err)
 	}
+	if err := rejectDuplicateJSONKeys(data); err != nil {
+		return fmt.Errorf("decode %s: %w", description, err)
+	}
 	decoder := json.NewDecoder(bytes.NewReader(data))
 	decoder.DisallowUnknownFields()
 	if err := decoder.Decode(value); err != nil {

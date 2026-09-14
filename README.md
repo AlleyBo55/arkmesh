@@ -135,9 +135,10 @@ Unsigned capsules remain supported for local integrity checks. Object paths come
 ```bash
 go test ./...
 go build ./cmd/arkmesh
+./scripts/security-gate.sh
 ```
 
-The implementation currently uses only the Go standard library.
+The security gate adds race detection and bounded fuzzing for capsule and identity parsers. The implementation currently uses only the Go standard library.
 
 ## Research roadmap
 
@@ -174,6 +175,8 @@ Read the full [threat model](docs/THREAT_MODEL.md).
 - [Key Authority and Revocation](docs/AUTHORITY.md): exact planned rotations and local rejection policy
 - [Threshold Emergency Recovery](docs/RECOVERY.md): independent approvals and exact recovery edges
 - [Local Lineage Checkpoints](docs/CHECKPOINTS.md): accepted heads, direct advancement, and rollback limits
+- [Security Invariants](docs/SECURITY_INVARIANTS.md): trust properties every change must preserve
+- [Security Policy](SECURITY.md): private vulnerability reporting and response expectations
 - [Experiment Plan](docs/EXPERIMENTS.md): metrics, baselines, partition tests, and recovery rehearsal
 - [GitHub Setup](.github/REPOSITORY_METADATA.md): repository description, topics, and issue labels
 
