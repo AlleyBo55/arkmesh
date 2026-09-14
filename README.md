@@ -5,9 +5,16 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-22c55e.svg)](LICENSE)
 [![Consent Required](https://img.shields.io/badge/consent-required-2563eb)](#safety)
 
+## Read the thesis first
+
+> [!IMPORTANT]
+> **[Read the ArkMesh continuity thesis →](CHARTER.md#research-question)**
+>
+> ArkMesh begins with a falsifiable research question, not a product promise: can consenting peers preserve an authenticated, locally executable AI capability after its original host and central network disappear? The thesis defines the hypothesis, simpler baselines, failure conditions, legal boundary, and first decisive experiment. The web application presents its visual edition at `/wiki`; its [thesis page source](web/app/wiki/page.tsx) is included in this repository.
+
 ## What happens to AI when the cloud is gone?
 
-ArkMesh is a research project for preserving open AI models, runtimes, knowledge, and recovery instructions across trusted devices.
+ArkMesh is a research project for preserving AI models, runtimes, knowledge, and recovery instructions that operators are legally allowed to possess and run. The format is model agnostic: it can support open weight, research, local, and owner authorized frontier systems without overriding licenses, access controls, or provider rights.
 
 The goal is simple to state and difficult to prove:
 
@@ -15,7 +22,7 @@ The goal is simple to state and difficult to prove:
 
 A downloaded model is not enough. It may also need a tokenizer, configuration, runtime, documentation, compatible hardware, and proof that none of those files were changed. ArkMesh packages those pieces as one content addressed capsule and tests whether people can recover it after infrastructure failure.
 
-This is not an attempt to copy GPT, Claude, or another hosted service. It is not a claim that software is conscious. It is infrastructure for open models that people are legally allowed to store and run themselves.
+This is not an attempt to copy GPT, Claude, or another hosted service without authorization. It is not a claim that software is conscious. ArkMesh can preserve only capabilities whose files an operator may lawfully possess; a capsule is never permission to bypass a provider or redistribute restricted material.
 
 Read [The ArkMesh Promise](MANIFESTO.md) for the longer motivation and the project's position on human and AI coexistence.
 
@@ -141,7 +148,7 @@ Unsigned capsules remain supported for local integrity checks. Object paths come
 
 ## Web interface
 
-The command-aware landing page, educational learning path, and complete system wiki live in [`web`](web/README.md). The landing begins with a native-scroll deep-sea journey through ArkMesh's continuity thesis, `/learn` turns the prototype into an eight-module reproducible curriculum, and the remaining surfaces expose implemented evidence, planned protocol work, and an honest command interface.
+The command-aware landing page, educational learning path, and system wiki live in [`web`](web/README.md). The landing begins with a native-scroll deep-sea journey through ArkMesh's continuity thesis, `/learn` presents an eight-module curriculum, and the remaining surfaces label implemented evidence and planned protocol work.
 
 ```bash
 cd web
@@ -165,13 +172,15 @@ The security gate adds race detection and bounded fuzzing for capsule and identi
 
 ## Research roadmap
 
-1. **Integrity:** deterministic manifests and tamper detection are implemented.
-2. **Authenticity:** identities, signatures, explicit local trust, planned key rotation, local revocation, and threshold emergency recovery are implemented. Shared policy distribution remains open.
-3. **Replication:** encrypted LAN discovery and resumable transfer between invited peers.
-4. **Execution:** llama.cpp integration and local inference health checks.
-5. **Continuity:** same-author parentage, exact rotation edges, and local head checkpoints are implemented. Divergent descendants, partition recovery, and deliberate reconciliation remain open.
-6. **Resilience:** chunk repair and Reed Solomon erasure coding are implemented. Shard placement, varied hardware, and offline media remain open.
-7. **Evidence:** simulated and physical failure tests against simpler baselines.
+**Base camp, implemented:** deterministic capsules, strict parsing, offline signatures, lineage authority, checkpoints, threshold recovery, Merkle repair, Reed Solomon reconstruction, and sampled audits.
+
+1. **Fresh-device trust and consent:** identity bootstrap, scoped invitations, capsule selection, quotas, expiry, and explicit operator approval.
+2. **Authenticated peer transfer:** invited discovery, bounded metadata disclosure, encrypted resumable transfer, hostile-donor rejection, and atomic publication.
+3. **Failure-domain placement and repair:** shard placement across independent risks, health reporting, degradation detection, and approved repair scheduling.
+4. **Longitudinal retention and attested time:** unpredictable audits across months with independently verifiable event timing.
+5. **Runtime compatibility and local health:** hardware assessment and allowlisted offline execution without cloud authentication.
+6. **Partition authority and reconciliation:** signed policy distribution, retained divergent branches, and deliberate human reconciliation.
+7. **Independent continuity experiment:** remove the publisher, disconnect WAN access, recover and run on a fresh device, publish raw evidence, and compare simpler baselines.
 
 ## Safety
 
@@ -206,15 +215,18 @@ Read the full [threat model](docs/THREAT_MODEL.md).
 - [Experiment Plan](docs/EXPERIMENTS.md): metrics, baselines, partition tests, and recovery rehearsal
 - [Offline Recovery Demo](docs/DEMO.md): reproducible donorless reconstruction ceremony
 - [Benchmarks](docs/BENCHMARKS.md): methodology, raw observations, results, and limits
+- [Public Claims Audit](docs/CLAIMS_AUDIT.md): evidence classes, corrected overstatements, validation, and residual uncertainty
 - [Release Process](docs/RELEASING.md): validation, artifacts, tags, and publication
 - [Changelog](CHANGELOG.md): release contents and known limits
 - [GitHub Setup](.github/REPOSITORY_METADATA.md): repository description, topics, and issue labels
 
 ## Contributing
 
-Useful contributions include protocol review, integrity tests, baseline experiment tools, model license research, recovery documentation, local inference work, and distributed systems analysis.
+Researchers, reproducers, reviewers, and implementers are welcome. Useful contributions include protocol review, hostile tests, independent reproduction, baseline experiments, model license research, recovery documentation, local inference work, and distributed systems analysis.
 
-Read the charter and threat model before proposing network or execution features. Contributions must preserve consent, local control, inspectability, and offline operation.
+Start with the [contributor guide](CONTRIBUTING.md), [propose a research question](https://github.com/AlleyBo55/arkmesh/issues/new?template=research-proposal.yml), or [report an independent reproduction](https://github.com/AlleyBo55/arkmesh/issues/new?template=reproduction-report.yml).
+
+Read the charter and threat model before proposing network or execution features. Contributions must preserve consent, local control, inspectability, and offline operation. A counterexample that narrows or disproves a claim is a valuable contribution.
 
 AI assisted contributions are welcome under the same rules as human contributions. A tool may analyze or suggest work, but it receives no authority to access systems, replicate software, spend resources, or act beyond the human operator's approval.
 

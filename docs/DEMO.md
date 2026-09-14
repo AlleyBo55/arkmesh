@@ -35,10 +35,10 @@ A successful run ends with:
 
 ```text
 PASS: donorless recovery rebuilt the exact signed object.
-runtime network requests: none
+ArkMesh peer/network operations: not implemented
 ```
 
-The script makes no network requests after or during the local build. Running it on a machine with the Go module cache already populated therefore requires no WAN access. ArkMesh itself currently uses only the Go standard library.
+ArkMesh currently implements no peer or network transport, and the script invokes no network client directly. A machine with Go 1.22 installed can run the ceremony without WAN access. Go's own toolchain selection may attempt a download if the required toolchain is missing, so operators should install and cache it before an offline rehearsal. The ArkMesh Go implementation itself currently uses only the standard library.
 
 ## What it does not prove
 

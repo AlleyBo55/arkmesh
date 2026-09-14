@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Learn",
-  description: "Learn how ArkMesh tests whether useful open AI capabilities can remain obtainable, verifiable, and runnable after their original infrastructure disappears.",
+  description: "Learn how ArkMesh tests whether lawfully held AI capabilities can remain obtainable, verifiable, and runnable after their original infrastructure disappears.",
 };
 
 const modules = [
@@ -17,8 +17,8 @@ const modules = [
   {
     number: "02",
     status: "VERIFIED",
-    title: "Build a complete capsule",
-    outcome: "Package weights, runtime context, configuration, knowledge, licenses, and recovery instructions as content-addressed objects.",
+    title: "Build a declared capability capsule",
+    outcome: "Package declared weights, runtime context, configuration, knowledge, licenses, and recovery instructions as content-addressed objects.",
     experiment: "arkmesh pack",
   },
   {
@@ -47,14 +47,14 @@ const modules = [
     status: "PLANNED",
     title: "Connect consenting peers",
     outcome: "Design discovery and encrypted transfer where finding a device never grants permission to store, send, or execute data.",
-    experiment: "plan peers",
+    experiment: "plan transfer",
   },
   {
     number: "07",
     status: "PLANNED",
     title: "Prove the recovered ark can run",
     outcome: "Execute an allowlisted local model health check and report verified, dormant, executable, or incompatible capability honestly.",
-    experiment: "plan inference",
+    experiment: "plan execution",
   },
   {
     number: "08",
@@ -74,18 +74,18 @@ const principles = [
 
 export default function LearnPage() {
   return (
-    <main>
+    <main id="main-content" className="archive-main">
       <section className="learn-hero content-grid">
         <div className="section-kicker mb-7">The ArkMesh learning path</div>
         <p className="learn-index">ARKMESH EDUCATION // KEY 001 // OPEN SOURCE</p>
-        <h1>Save open AI<br /><span>from extinction.</span></h1>
+        <h1>Keep AI progress<br /><span>from disappearing.</span></h1>
         <div className="learn-definition">
-          <strong>Definition, not mythology.</strong>
-          <p>Here, AI extinction means a useful open capability can no longer be obtained, verified, or run because its host, files, runtime context, or trust evidence disappeared. It does not mean software is alive or conscious.</p>
+          <strong>Model-agnostic, not rights-agnostic.</strong>
+          <p>ArkMesh can preserve any AI capability whose files an operator is legally allowed to possess: open-weight, research, local, and owner-authorized frontier systems. It cannot recover a closed hosted model without the provider&apos;s authorization or required files.</p>
         </div>
         <div className="learn-actions">
           <a href="#curriculum">Begin the curriculum</a>
-          <a href="https://github.com/AlleyBo55/arkmesh" target="_blank" rel="noreferrer">Inspect the source ↗</a>
+          <a href="https://github.com/AlleyBo55/arkmesh/issues/new?template=research-proposal.yml" target="_blank" rel="noreferrer">Propose research ↗</a>
         </div>
       </section>
 
@@ -96,7 +96,7 @@ export default function LearnPage() {
             <div className="section-kicker mb-6">Why a prototype can matter</div>
             <h2 id="key-thesis-title">The key is not a finished answer. It is a question someone else can run.</h2>
             <p>ArkMesh turns one broad fear into falsifiable work: remove the original host, disconnect the internet, introduce a fresh device, recover exact signed capability from surviving pieces, and show every place the experiment still fails.</p>
-            <p>A stronger researcher may replace the protocol, prove a better trust model, or show that a simpler backup wins. That is success. The project is useful when it gives capable people a transparent starting point instead of a myth.</p>
+            <p>Another researcher may replace the protocol, demonstrate a better trust model, or show that a simpler backup wins. That is success. The project is useful when it gives capable people a transparent starting point instead of a myth.</p>
           </div>
         </div>
       </section>
@@ -139,7 +139,7 @@ export default function LearnPage() {
       <section className="content-grid py-20 md:py-28" aria-labelledby="ceremony-title">
         <div className="grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:items-center">
           <div>
-            <div className="section-kicker mb-5">Safe local laboratory</div>
+            <div className="section-kicker mb-5">Isolated local fixture</div>
             <h2 id="ceremony-title" className="text-4xl font-black uppercase text-white md:text-6xl">Run the failure ceremony.</h2>
             <p className="mt-6 leading-8 text-blue-100">The release fixture contains generated test bytes, not a bundled model. The ceremony records what was deleted, what survived, and what exact evidence permits reconstruction.</p>
           </div>
@@ -155,7 +155,7 @@ export default function LearnPage() {
           <h2>Understand it. Challenge it. Build what is missing.</h2>
           <div>
             <Link href="/wiki#roadmap">Explore the research roadmap</Link>
-            <a href="https://github.com/AlleyBo55/arkmesh" target="_blank" rel="noreferrer">Contribute on GitHub ↗</a>
+            <a href="https://github.com/AlleyBo55/arkmesh/blob/master/CONTRIBUTING.md" target="_blank" rel="noreferrer">Choose a contribution path ↗</a>
           </div>
         </div>
       </section>

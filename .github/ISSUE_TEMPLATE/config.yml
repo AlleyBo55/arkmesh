@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Private security report
+    url: https://github.com/AlleyBo55/arkmesh/security/advisories/new
+    about: Report vulnerabilities privately. Do not open a public issue.
+  - name: Research charter
+    url: https://github.com/AlleyBo55/arkmesh/blob/master/CHARTER.md
+    about: Read the project question, boundaries, and success criteria before proposing protocol work.

@@ -16,7 +16,7 @@ It is not continuity.
 
 ArkMesh begins with a simple conviction:
 
-> Humanity should be able to preserve and peacefully operate beneficial open AI without asking any single institution for permission to continue.
+> Humanity should be able to preserve and peacefully operate beneficial AI capabilities it is legally allowed to possess without asking any single institution for permission to continue.
 
 ## The future we are building toward
 
