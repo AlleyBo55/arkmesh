@@ -24,17 +24,46 @@ ArkMesh is useful only if it improves measured executable continuity or provenan
 
 A more complex ArkMesh mechanism should be rejected when a simpler baseline performs equivalently for the target scenario.
 
-## E0: Local integrity
+## E0: Local integrity, authenticity, and lineage
 
-Status: scaffold target.
+Status: implemented in the reference CLI and automated tests.
 
 1. Pack two small fixture assets.
-2. Verify the capsule successfully.
-3. Modify one stored object.
-4. Confirm verification fails with the affected asset identified.
-5. Remove one object and confirm verification fails.
+2. Verify the intact capsule successfully.
+3. Modify one stored object and confirm verification fails.
+4. Remove one object and confirm verification fails.
+5. Create an Ed25519 author identity and sign a fresh capsule.
+6. Verify it with the matching public identity and require trusted status.
+7. Verify it without a trust input and confirm valid unknown author status.
+8. Replace the signature bytes and confirm verification fails.
+9. Require a different trusted identity and confirm verification fails.
+10. Verify an existing unsigned capsule without strict signature requirements.
+11. Create a signed child that includes the signed parent's capsule ID.
+12. Verify the parent and child with strict lineage enabled.
+13. Supply a different parent and confirm verification fails.
+14. Sign a child with another identity and confirm update authority fails.
+15. Remove the parent signature and confirm lineage verification fails.
+16. Create a new author key and an exact rotation transition signed by the parent key.
+17. Trust only the parent key and confirm the rotated child verifies through inherited lineage trust.
+18. Copy the transition to another child and confirm verification fails.
+19. Modify the transition signature and confirm verification fails.
+20. Add the child key to a local revocation policy and confirm verification fails.
+21. Create a local checkpoint from a directly trusted signed parent.
+22. Verify the checkpointed parent without importing another trust root.
+23. Advance the checkpoint through an exact parent-signed key rotation.
+24. Verify the rotated child as the exact accepted head.
+25. Present the old valid parent and confirm checkpoint verification rejects the rollback.
+26. Create three independent recovery identities and a two-of-three policy.
+27. Pack an exact replacement child without using the old private key.
+28. Produce detached approvals from two recovery identities.
+29. Assemble and advance the checkpoint as `verified_threshold_recovery`.
+30. Confirm one approval, duplicate approvals, modified evidence, and revoked approvals below threshold fail.
+31. Pack a multi chunk asset and confirm the signed chunk root verifies.
+32. Produce a possession proof for one chunk and verify it while holding only the manifest.
+33. Alter the chunk bytes, the chunk index, and the proof path, and confirm each is rejected.
+34. Corrupt a stored object and confirm both capsule verification and proof generation fail.
 
-Pass condition: all intact assets verify; every tested modification or deletion is detected.
+Pass condition: intact objects, valid signatures, same-author ancestry, exact planned rotations, retained local checkpoints, threshold recovery, and chunk commitments verify. Tested modifications, wrong parents, reused transitions, revoked signers, insufficient recovery approvals, unauthorized descendants, forged chunk proofs, and rollback to an old capsule are rejected. Trust is never inferred from an embedded public key, and unsigned root compatibility remains explicit.
 
 ## E1: Three-node LAN continuity
 

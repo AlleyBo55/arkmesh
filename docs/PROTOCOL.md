@@ -1,22 +1,26 @@
 # Capsule Protocol
 
-Status: **v0alpha1, unstable, unsigned**
+Status: **v0alpha1, unstable, optional signatures implemented**
 
-This document describes the implemented on-disk capsule envelope and records invariants for later peer replication. It is not yet a stable public protocol.
+This document describes the implemented on disk capsule envelope. It is not yet a stable public protocol.
 
 ## Directory layout
 
 ```text
 <capsule>/
 ├── manifest.json
+├── signature.json
+├── authority.json
 └── objects/
     ├── <lowercase sha256>
     └── ...
 ```
 
-Object paths are derived only from validated lowercase SHA-256 digests. Human-provided file names are display metadata and never become storage paths.
+`signature.json` is optional so existing unsigned capsules remain valid for local integrity checks. `authority.json` appears only on a child signed by a new key after an exact parent-signed rotation. Object paths are derived only from validated lowercase SHA-256 digests. Human provided file names are display metadata and never become storage paths.
 
 ## Manifest
+
+A root capsule omits `parent_capsule_id`. A descendant includes the exact capsule ID of its parent:
 
 ```json
 {
@@ -24,68 +28,163 @@ Object paths are derived only from validated lowercase SHA-256 digests. Human-pr
   "capsule_id": "sha256:<digest>",
   "name": "field-assistant",
   "created_at": "2026-09-14T00:00:00Z",
+  "parent_capsule_id": "sha256:<parent-digest>",
   "assets": [
     {
       "role": "model",
       "name": "model.gguf",
       "size": 1234,
-      "sha256": "<digest>"
+      "sha256": "<digest>",
+      "chunk_size": 1048576,
+      "chunk_root": "<digest>"
     }
   ]
 }
 ```
 
-The capsule ID is SHA-256 over the compact JSON representation of the manifest with `capsule_id` set to an empty string. Struct field order is fixed by the reference implementation for v0alpha1. This derivation is experimental and will be replaced or formally canonicalized before interoperability is promised.
+`chunk_size` and `chunk_root` are omitted together on capsules packed before chunk commitments existed, which preserves their exact capsule IDs. When present they are covered by the capsule ID and therefore by the signature. See [Chunk Commitments and Possession Proofs](CHUNKS.md) for the exact leaf and node bytes, the unpaired node rule, and the proof format.
+
+The capsule ID is SHA-256 over the compact JSON representation of the manifest with `capsule_id` set to an empty string. `parent_capsule_id` is omitted from root JSON, which preserves existing root capsule IDs. For descendants, the parent ID is included in the digest and therefore covered by the capsule signature.
+
+Struct field order is fixed by the reference implementation for v0alpha1. This derivation remains experimental until an interoperability review formalizes canonical serialization.
+
+## Lineage and update authority
+
+A root has no declared parent. A child names one parent capsule ID, and the supplied parent must verify and match that exact ID. Parent and child must both have valid Ed25519 signatures.
+
+Three update paths are implemented:
+
+1. **Same author:** parent and child use the same signing key. No authority file is allowed.
+2. **Planned key rotation:** the child uses a new key and includes `authority.json`, signed by the parent key, binding the exact parent ID, child ID, old signer, and new signer.
+3. **Threshold recovery:** independently controlled recovery keys approve the exact replacement edge under an explicit local policy, and the child includes `recovery.json`.
+
+Verification reports:
+
+- `root` when no parent is declared
+- `parent_not_checked` when a parent is declared but not supplied
+- `verified_same_author` when parent and child use the same valid signer
+- `verified_key_rotation` when the parent key authorized the child's exact new signer
+- `verified_threshold_recovery` when enough distinct unrevoked recovery members approved the exact edge
+
+Strict lineage mode rejects a descendant when its parent was not supplied. A mismatched parent, invalid signature, missing authority, reused transition, revoked signer, insufficient recovery threshold, or unauthorized child key is rejected.
+
+Branches from one parent remain possible. ArkMesh does not select a winning branch or merge descendants. Planned rotation requires the old private key. Threshold recovery instead requires the retained checkpointed parent, explicit policy, and enough surviving custodians.
+
+See [Key Authority and Revocation](AUTHORITY.md), [Threshold Emergency Recovery](RECOVERY.md), and [Local Lineage Checkpoints](CHECKPOINTS.md) for exact formats and limitations.
 
 ## Asset roles
 
-Roles are currently free-form lowercase identifiers supplied by the packer. Initial conventions:
+Roles are lowercase identifiers supplied by the packer. Initial conventions:
 
 - `model`: model weights
 - `runtime`: executable runtime or source bundle
 - `tokenizer`: tokenizer files
-- `config`: model/runtime configuration
+- `config`: model or runtime configuration
 - `knowledge`: intentionally shared reference material
-- `policy`: human-readable or machine-readable operating policy
+- `policy`: human readable or machine readable operating policy
 - `license`: license and redistribution records
 - `recovery`: offline operating and repair instructions
 
-A role describes purpose; it grants no permission and does not make content safe to execute.
+A role describes purpose. It grants no permission and does not make content safe to execute.
 
-## Verification
+## Author identity
 
-A verifier must reject a capsule when:
+ArkMesh creates an Ed25519 key pair in a new owner controlled directory:
 
-- The schema version is unsupported.
-- The capsule ID does not match the manifest body.
-- The name or asset list is empty.
-- An asset role or display name is empty.
-- A digest is not exactly 64 lowercase hexadecimal characters.
-- An object is absent, not a regular file, has the wrong size, or has the wrong digest.
+```text
+<identity>/
+├── identity.json
+└── identity.key
+```
 
-Extra objects may exist but do not belong to the capsule unless listed in the manifest.
+`identity.json` is public and may be copied into a local trust store. `identity.key` contains the private key, is written with owner only file permissions, and must never enter a capsule or source repository.
 
-## Planned signed envelope
+The public identity format is:
 
-Peer replication must not ship until a later format defines:
+```json
+{
+  "schema_version": "arkmesh.identity/v0alpha1",
+  "algorithm": "ed25519",
+  "key_id": "ed25519:<sha256-of-public-key>",
+  "public_key": "<standard-base64>"
+}
+```
 
-- Ed25519 author and node identities
-- Signature scope and canonical serialization
-- Parent capsule IDs and update authority
-- Trust-root import and invitation flow
-- Revocation and key-rotation semantics
+The key ID is a fingerprint, not a person's legal identity. Operators establish trust by obtaining and checking `identity.json` through a channel they consider appropriate.
+
+## Detached signature
+
+A signed capsule adds `signature.json`:
+
+```json
+{
+  "schema_version": "arkmesh.signature/v0alpha1",
+  "capsule_id": "sha256:<digest>",
+  "signer": {
+    "schema_version": "arkmesh.identity/v0alpha1",
+    "algorithm": "ed25519",
+    "key_id": "ed25519:<digest>",
+    "public_key": "<standard-base64>"
+  },
+  "signature": "<standard-base64>"
+}
+```
+
+Ed25519 signs these exact UTF-8 bytes:
+
+```text
+"arkmesh.capsule.signature/v0alpha1\n" + capsule_id + "\n"
+```
+
+The domain prefix prevents the signature from being reused as another message type. The capsule ID already binds the complete manifest, and each listed object is bound by its digest and size.
+
+## Verification states
+
+After object and manifest integrity checks, verification reports one of three successful states:
+
+- `unsigned`: no signature exists and strict signature checks were not requested
+- `valid_unknown_author`: the signature is valid, but the signer is absent from the supplied trust set
+- `valid_trusted_author`: the signature is valid and exactly matches a supplied public identity
+
+Verification fails for unknown, duplicate, or trailing manifest fields; malformed envelopes; unsupported schemas or algorithms; changed capsule IDs; invalid key fingerprints; invalid key lengths; symlink or nonregular objects; invalid signatures; a chunk root, chunk count, or chunk size that disagrees with stored bytes; or a missing trusted signer when strict trust is required.
+
+A valid trusted signature proves control of the signing private key for that capsule ID. It does not prove content safety, factual accuracy, license compliance, or the human identity behind the key.
+
+## Local lineage checkpoints
+
+An operator may store an accepted lineage head outside the capsule:
+
+```json
+{
+  "schema_version": "arkmesh.checkpoint/v0alpha1",
+  "capsule_id": "sha256:<digest>",
+  "signer_id": "ed25519:<digest>"
+}
+```
+
+Initial creation requires direct trust in the capsule signer. Verification against a checkpoint requires exact capsule ID and signer ID equality. Advancement requires the checkpointed capsule as the supplied parent and one valid direct same-author or key-rotation edge.
+
+A retained checkpoint rejects rollback to another valid capsule. It does not establish a global latest version and cannot detect rollback of the checkpoint file itself. See [Local Lineage Checkpoints](CHECKPOINTS.md) for commands and the complete security boundary.
+
+## Remaining authenticity work
+
+Peer replication must not ship until later work defines:
+
+- Distribution and organizational signing of revocation and recovery policies
+- Trust group invitation and import flow
+- Replay rules across peers and divergent branches
 - License and provenance declarations
-- Runtime compatibility and health-check declarations
-- Chunking rules for resumable large-object transfer
+- Runtime compatibility and health checks
+- Chunking rules for resumable large object transfer
 
 ## Planned network behavior
 
-1. Device owner installs and starts a node locally.
-2. Owner imports a trust-group invitation.
+1. A device owner installs and starts a node locally.
+2. The owner imports a trust group invitation.
 3. Authenticated peers advertise capsule IDs and verified object availability.
-4. Receiver requests only missing chunks within configured quotas.
-5. Receiver verifies every chunk and complete object before storage.
-6. A capsule remains data until its manifest, author, policy, license, and runtime are approved.
+4. The receiver requests only missing chunks within configured quotas.
+5. The receiver verifies every chunk and complete object before storage.
+6. A capsule remains data until its author, policy, license, and runtime are approved.
 7. Execution occurs only through an allowlisted local runtime.
 
 No central tracker may be required for LAN operation. WAN discovery and relays, if added, must remain optional.

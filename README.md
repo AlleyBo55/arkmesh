@@ -28,22 +28,33 @@ Read [The ArkMesh Promise](MANIFESTO.md) for the longer motivation and the proje
 
 - Pack local files into a content addressed capsule
 - Record SHA-256 hashes, roles, file names, and sizes
+- Commit a Merkle chunk root per asset inside the signed manifest
+- Prove and verify possession of one exact chunk without holding the whole object
 - Derive a deterministic capsule ID
+- Create local Ed25519 author identities
+- Sign capsules without placing private keys inside them
+- Verify trusted, unknown, invalid, and unsigned capsule states offline
+- Bind a child capsule to one parent ID
+- Verify same-author update authority across a parent and child
+- Authorize one exact child key through a parent-signed rotation transition
+- Apply explicit local revocation policies during offline verification
+- Pin one accepted lineage head in a local checkpoint
+- Advance a checkpoint through one verified direct lineage edge
+- Recover from old-key loss through distinct threshold approvals
 - Inspect a capsule manifest
-- Verify every stored object
-- Detect missing files, changed content, manifest edits, and invalid roles
+- Detect missing files, changed content, invalid signatures, wrong parents, reused transitions, revoked signers, insufficient recovery approval, unauthorized child keys, and rollback against a retained checkpoint
 
 ### Not built yet
 
-- Author identities and Ed25519 signatures
+- Distribution or organizational signing of revocation and recovery policies
 - Peer discovery and encrypted transfer
-- Resumable chunk exchange
+- Resumable chunk exchange between peers and damage localization
 - Local model inference
-- Capsule ancestry and reconciliation
+- Replay agreement across peers and divergent branch reconciliation
 - Erasure coding
 - Recovery dashboard
 
-The current format proves internal consistency. It does not prove who created a capsule or whether its contents are safe. Do not accept a v0alpha1 capsule from an untrusted source.
+A valid signature proves that the holder of a specific private key signed the capsule ID. It does not prove the author's legal identity, the truth of the contents, license compliance, or safety. Trust is imported explicitly by each operator.
 
 ## The planned experiment
 
@@ -106,36 +117,38 @@ go test ./...
 go build ./cmd/arkmesh
 ```
 
-The help command documents the current pack, inspect, and verify syntax.
+The help command documents identity, checkpoint, pack, inspect, and verify syntax.
 
-A capsule currently looks like this:
+A signed capsule contains:
 
 ```text
 field-assistant.ark/
 ├── manifest.json
+├── signature.json
 └── objects/
     ├── <sha256>
     └── <sha256>
 ```
 
-Object paths come only from validated content hashes. Human supplied names and roles remain metadata.
+Unsigned capsules remain supported for local integrity checks. Object paths come only from validated content hashes. Human supplied names and roles remain metadata.
 
 ## Build and test
 
 ```bash
 go test ./...
 go build ./cmd/arkmesh
+./scripts/security-gate.sh
 ```
 
-The implementation currently uses only the Go standard library.
+The security gate adds race detection and bounded fuzzing for capsule and identity parsers. The implementation currently uses only the Go standard library.
 
 ## Research roadmap
 
-1. **Integrity:** deterministic manifests and tamper detection. This is the current stage.
-2. **Authenticity:** signed manifests, author identities, trust roots, and revocation.
+1. **Integrity:** deterministic manifests and tamper detection are implemented.
+2. **Authenticity:** identities, signatures, explicit local trust, planned key rotation, local revocation, and threshold emergency recovery are implemented. Shared policy distribution remains open.
 3. **Replication:** encrypted LAN discovery and resumable transfer between invited peers.
 4. **Execution:** llama.cpp integration and local inference health checks.
-5. **Continuity:** parentage, divergent descendants, partition recovery, and deliberate reconciliation.
+5. **Continuity:** same-author parentage, exact rotation edges, and local head checkpoints are implemented. Divergent descendants, partition recovery, and deliberate reconciliation remain open.
 6. **Resilience:** erasure coding, repair, varied hardware, and offline media.
 7. **Evidence:** simulated and physical failure tests against simpler baselines.
 
@@ -160,7 +173,13 @@ Read the full [threat model](docs/THREAT_MODEL.md).
 
 - [Research Charter](CHARTER.md): mission, definitions, hypothesis, and limits
 - [Threat Model](docs/THREAT_MODEL.md): assets, trust boundaries, attacks, and propagation limits
-- [Capsule Protocol](docs/PROTOCOL.md): current format and planned signed protocol
+- [Capsule Protocol](docs/PROTOCOL.md): current capsule, signature, and lineage format
+- [Chunk Commitments](docs/CHUNKS.md): Merkle chunk roots and possession proofs
+- [Key Authority and Revocation](docs/AUTHORITY.md): exact planned rotations and local rejection policy
+- [Threshold Emergency Recovery](docs/RECOVERY.md): independent approvals and exact recovery edges
+- [Local Lineage Checkpoints](docs/CHECKPOINTS.md): accepted heads, direct advancement, and rollback limits
+- [Security Invariants](docs/SECURITY_INVARIANTS.md): trust properties every change must preserve
+- [Security Policy](SECURITY.md): private vulnerability reporting and response expectations
 - [Experiment Plan](docs/EXPERIMENTS.md): metrics, baselines, partition tests, and recovery rehearsal
 - [GitHub Setup](.github/REPOSITORY_METADATA.md): repository description, topics, and issue labels
 

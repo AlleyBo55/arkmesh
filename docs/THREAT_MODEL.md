@@ -64,7 +64,9 @@ Crossing this boundary would make the system worm-like and invalidate the projec
 
 ## v0alpha1 limitations
 
-The current scaffold verifies SHA-256 integrity only. It does not authenticate authors, encrypt transfers, execute models, or establish peer trust. A valid v0alpha1 manifest proves internal consistency, not safety, truth, license compliance, or trusted origin.
+The current implementation verifies SHA-256 object integrity, Ed25519 capsule signatures, same-author lineage, exact parent-signed key rotations, local operator revocation policies, exact local lineage checkpoints, and checkpoint-anchored threshold recovery. Recovery requires at least two distinct policy members, detached signatures over one exact edge, and enough unrevoked approvals.
+
+A local attacker who can replace checkpoint, revocation, or recovery policy files remains inside the trusted device boundary. ArkMesh does not provide organizational policy distribution, replay consensus across peers or divergent branches, encrypted transfer, peer authentication, model execution, or legal identity proof. Cryptographic approval does not prove safety, truth, license compliance, custodian independence, or authorization to execute capsule contents.
 
 ## Out of scope
 

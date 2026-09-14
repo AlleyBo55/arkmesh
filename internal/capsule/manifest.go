@@ -1,6 +1,7 @@
 package capsule
 
 import (
+	"bytes"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
@@ -28,27 +29,50 @@ type AssetSource struct {
 }
 
 type Asset struct {
-	Role   string `json:"role"`
-	Name   string `json:"name"`
-	Size   int64  `json:"size"`
-	SHA256 string `json:"sha256"`
+	Role      string `json:"role"`
+	Name      string `json:"name"`
+	Size      int64  `json:"size"`
+	SHA256    string `json:"sha256"`
+	ChunkSize int64  `json:"chunk_size,omitempty"`
+	ChunkRoot string `json:"chunk_root,omitempty"`
 }
 
 type Manifest struct {
-	SchemaVersion string  `json:"schema_version"`
-	CapsuleID     string  `json:"capsule_id"`
-	Name          string  `json:"name"`
-	CreatedAt     string  `json:"created_at"`
-	Assets        []Asset `json:"assets"`
+	SchemaVersion   string  `json:"schema_version"`
+	CapsuleID       string  `json:"capsule_id"`
+	Name            string  `json:"name"`
+	CreatedAt       string  `json:"created_at"`
+	ParentCapsuleID string  `json:"parent_capsule_id,omitempty"`
+	Assets          []Asset `json:"assets"`
+}
+
+type PackOptions struct {
+	ParentCapsuleID string
+	ChunkSize       int64
 }
 
 func Pack(name, outputDir string, sources []AssetSource, now time.Time) (Manifest, error) {
+	return PackWithOptions(name, outputDir, sources, now, PackOptions{})
+}
+
+func PackWithOptions(name, outputDir string, sources []AssetSource, now time.Time, options PackOptions) (Manifest, error) {
 	name = strings.TrimSpace(name)
 	if name == "" {
 		return Manifest{}, errors.New("capsule name is required")
 	}
 	if len(sources) == 0 {
 		return Manifest{}, errors.New("at least one asset is required")
+	}
+	parentCapsuleID := strings.TrimSpace(options.ParentCapsuleID)
+	if parentCapsuleID != "" && !validCapsuleID(parentCapsuleID) {
+		return Manifest{}, fmt.Errorf("invalid parent capsule ID %q", options.ParentCapsuleID)
+	}
+	chunkSize := options.ChunkSize
+	if chunkSize == 0 {
+		chunkSize = DefaultChunkSize
+	}
+	if !ValidChunkSize(chunkSize) {
+		return Manifest{}, fmt.Errorf("invalid chunk size %d", options.ChunkSize)
 	}
 	if _, err := os.Stat(filepath.Join(outputDir, "manifest.json")); err == nil {
 		return Manifest{}, fmt.Errorf("capsule already exists at %s", outputDir)
@@ -63,7 +87,7 @@ func Pack(name, outputDir string, sources []AssetSource, now time.Time) (Manifes
 
 	assets := make([]Asset, 0, len(sources))
 	for _, source := range sources {
-		asset, err := storeAsset(objectsDir, source)
+		asset, err := storeAsset(objectsDir, source, chunkSize)
 		if err != nil {
 			return Manifest{}, err
 		}
@@ -81,10 +105,11 @@ func Pack(name, outputDir string, sources []AssetSource, now time.Time) (Manifes
 	})
 
 	manifest := Manifest{
-		SchemaVersion: SchemaVersion,
-		Name:          name,
-		CreatedAt:     now.UTC().Format(time.RFC3339),
-		Assets:        assets,
+		SchemaVersion:   SchemaVersion,
+		Name:            name,
+		CreatedAt:       now.UTC().Format(time.RFC3339),
+		ParentCapsuleID: parentCapsuleID,
+		Assets:          assets,
 	}
 	manifest.CapsuleID = capsuleID(manifest)
 
@@ -95,12 +120,28 @@ func Pack(name, outputDir string, sources []AssetSource, now time.Time) (Manifes
 }
 
 func Load(root string) (Manifest, error) {
-	data, err := os.ReadFile(filepath.Join(root, "manifest.json"))
+	file, err := os.Open(filepath.Join(root, "manifest.json"))
 	if err != nil {
 		return Manifest{}, fmt.Errorf("read manifest: %w", err)
 	}
+	defer file.Close()
+	data, err := io.ReadAll(file)
+	if err != nil {
+		return Manifest{}, fmt.Errorf("read manifest: %w", err)
+	}
+	if err := rejectDuplicateJSONKeys(data); err != nil {
+		return Manifest{}, fmt.Errorf("decode manifest: %w", err)
+	}
+	decoder := json.NewDecoder(bytes.NewReader(data))
+	decoder.DisallowUnknownFields()
 	var manifest Manifest
-	if err := json.Unmarshal(data, &manifest); err != nil {
+	if err := decoder.Decode(&manifest); err != nil {
+		return Manifest{}, fmt.Errorf("decode manifest: %w", err)
+	}
+	if err := decoder.Decode(&struct{}{}); !errors.Is(err, io.EOF) {
+		if err == nil {
+			return Manifest{}, errors.New("decode manifest: unexpected trailing JSON value")
+		}
 		return Manifest{}, fmt.Errorf("decode manifest: %w", err)
 	}
 	return manifest, nil
@@ -117,7 +158,7 @@ func Verify(root string) (Manifest, error) {
 
 	for _, asset := range manifest.Assets {
 		objectPath := filepath.Join(root, "objects", asset.SHA256)
-		info, err := os.Stat(objectPath)
+		info, err := os.Lstat(objectPath)
 		if err != nil {
 			return Manifest{}, fmt.Errorf("asset %q (%s): %w", asset.Name, asset.Role, err)
 		}
@@ -126,6 +167,22 @@ func Verify(root string) (Manifest, error) {
 		}
 		if info.Size() != asset.Size {
 			return Manifest{}, fmt.Errorf("asset %q (%s): size mismatch: manifest=%d actual=%d", asset.Name, asset.Role, asset.Size, info.Size())
+		}
+		if asset.ChunkRoot != "" {
+			digest, _, tree, err := ScanObject(objectPath, asset.ChunkSize)
+			if err != nil {
+				return Manifest{}, fmt.Errorf("asset %q (%s): %w", asset.Name, asset.Role, err)
+			}
+			if digest != asset.SHA256 {
+				return Manifest{}, fmt.Errorf("asset %q (%s): digest mismatch", asset.Name, asset.Role)
+			}
+			if tree.Count != ChunkCount(asset.Size, asset.ChunkSize) {
+				return Manifest{}, fmt.Errorf("asset %q (%s): chunk count mismatch", asset.Name, asset.Role)
+			}
+			if tree.Root != asset.ChunkRoot {
+				return Manifest{}, fmt.Errorf("asset %q (%s): chunk root mismatch", asset.Name, asset.Role)
+			}
+			continue
 		}
 		digest, _, err := hashFile(objectPath)
 		if err != nil {
@@ -137,6 +194,15 @@ func Verify(root string) (Manifest, error) {
 	}
 
 	return manifest, nil
+}
+
+func validCapsuleID(value string) bool {
+	algorithm, digest, found := strings.Cut(value, ":")
+	return found && algorithm == "sha256" && digestPattern.MatchString(digest)
+}
+
+func ValidateManifest(manifest Manifest) error {
+	return validateManifest(manifest)
 }
 
 func validateManifest(manifest Manifest) error {
@@ -151,6 +217,9 @@ func validateManifest(manifest Manifest) error {
 	}
 	if len(manifest.Assets) == 0 {
 		return errors.New("manifest must contain at least one asset")
+	}
+	if manifest.ParentCapsuleID != "" && !validCapsuleID(manifest.ParentCapsuleID) {
+		return fmt.Errorf("invalid parent capsule ID %q", manifest.ParentCapsuleID)
 	}
 	if manifest.CapsuleID != capsuleID(manifest) {
 		return errors.New("capsule ID does not match manifest")
@@ -168,11 +237,22 @@ func validateManifest(manifest Manifest) error {
 		if !digestPattern.MatchString(asset.SHA256) {
 			return fmt.Errorf("asset %q has an invalid SHA-256 digest", asset.Name)
 		}
+		if (asset.ChunkSize != 0) != (asset.ChunkRoot != "") {
+			return fmt.Errorf("asset %q must declare both chunk size and chunk root", asset.Name)
+		}
+		if asset.ChunkRoot != "" {
+			if !ValidChunkSize(asset.ChunkSize) {
+				return fmt.Errorf("asset %q has an invalid chunk size %d", asset.Name, asset.ChunkSize)
+			}
+			if !digestPattern.MatchString(asset.ChunkRoot) {
+				return fmt.Errorf("asset %q has an invalid chunk root", asset.Name)
+			}
+		}
 	}
 	return nil
 }
 
-func storeAsset(objectsDir string, source AssetSource) (Asset, error) {
+func storeAsset(objectsDir string, source AssetSource, chunkSize int64) (Asset, error) {
 	role := strings.TrimSpace(source.Role)
 	if !rolePattern.MatchString(role) {
 		return Asset{}, fmt.Errorf("invalid asset role %q", source.Role)
@@ -231,11 +311,21 @@ func storeAsset(objectsDir string, source AssetSource) (Asset, error) {
 		return Asset{}, fmt.Errorf("inspect stored object for %q: %w", source.Path, err)
 	}
 
+	storedDigest, storedSize, tree, err := ScanObject(finalPath, chunkSize)
+	if err != nil {
+		return Asset{}, fmt.Errorf("commit chunks for %q: %w", source.Path, err)
+	}
+	if storedDigest != digest || storedSize != size {
+		return Asset{}, fmt.Errorf("stored object for %q changed during packing", source.Path)
+	}
+
 	return Asset{
-		Role:   role,
-		Name:   filepath.Base(source.Path),
-		Size:   size,
-		SHA256: digest,
+		Role:      role,
+		Name:      filepath.Base(source.Path),
+		Size:      size,
+		SHA256:    digest,
+		ChunkSize: chunkSize,
+		ChunkRoot: tree.Root,
 	}, nil
 }
 
