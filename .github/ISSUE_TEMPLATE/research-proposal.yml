@@ -1,0 +1,56 @@
+name: Research proposal
+description: Propose prior art, a falsifiable question, threat hypothesis, or bounded experiment
+title: "research: "
+labels:
+  - "type: research"
+  - "status: needs evidence"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ArkMesh welcomes results that challenge or narrow the thesis. Do not include proprietary model files, private data, credentials, or unpatched vulnerability details.
+  - type: textarea
+    id: question
+    attributes:
+      label: Research question
+      description: State one question or claim that can be tested.
+      placeholder: Can...
+    validations:
+      required: true
+  - type: textarea
+    id: gap
+    attributes:
+      label: Evidence gap
+      description: What does the current implementation or documentation fail to establish?
+    validations:
+      required: true
+  - type: textarea
+    id: prior-art
+    attributes:
+      label: Prior art and sources
+      description: Link primary sources, protocols, papers, or reproducible implementations.
+    validations:
+      required: true
+  - type: textarea
+    id: experiment
+    attributes:
+      label: Smallest useful experiment
+      description: Describe setup, inputs, controls, observations, and failure conditions.
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Decision rule
+      description: What result would increase, reduce, or falsify confidence in the claim?
+    validations:
+      required: true
+  - type: checkboxes
+    id: boundaries
+    attributes:
+      label: Boundaries
+      options:
+        - label: This proposal does not require unauthorized access, restricted model material, private data, covert replication, or unapproved resource use.
+          required: true
+        - label: I have separated demonstrated behavior from assumptions and planned work.
+          required: true

@@ -111,7 +111,7 @@ fi
 printf '\nPASS: donorless recovery rebuilt the exact signed object.\n'
 printf 'original sha256:  %s\n' "$ORIGINAL_HASH"
 printf 'recovered sha256: %s\n' "$RECOVERED_HASH"
-printf 'runtime network requests: none\n'
+printf 'ArkMesh peer/network operations: not implemented\n'
 if [ "$KEEP" -eq 1 ]; then
   printf 'evidence retained at: %s\n' "$WORK"
 fi

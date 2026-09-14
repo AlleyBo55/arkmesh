@@ -4,7 +4,7 @@ Use these values when the repository is created on GitHub. This file is document
 
 ## Description
 
-> Offline-first, consent-based P2P preservation for open AI models, runtimes, and knowledge—built to remain verifiable and usable through outages and network partitions.
+> Research prototype for content-addressed AI capsules, offline signatures, authenticated repair, and donorless local recovery. Peer distribution and inference are planned.
 
 ## Suggested topics
 
@@ -32,9 +32,9 @@ Do not add implementation topics such as `libp2p`, `llama-cpp`, or `ed25519` unt
 
 ## Social preview copy
 
-**Headline:** AI capability that does not disappear with the cloud
+**Headline:** Can an AI capability outlive its original host?
 
-**Subheadline:** Verified open models, runtimes, and knowledge preserved across trusted devices for offline recovery.
+**Subheadline:** A local research prototype for signed capsules, authenticated repair, Reed Solomon reconstruction, and measured retrievability. Peer continuity remains unproven.
 
 ## Issue labels
 

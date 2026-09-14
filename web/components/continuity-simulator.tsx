@@ -6,33 +6,33 @@ const phases = [
   {
     id: "distribute",
     step: "01",
-    label: "Distribute",
-    headline: "Signed capsule split into six shards",
-    detail: "Four data shards and two parity shards are placed across independent holders.",
-    output: "CAPSULE COMMITTED // 6 SHARDS ONLINE",
+    label: "Protect",
+    headline: "Signed capsule encoded as six local shard files",
+    detail: "The implemented demo creates four data shards and two parity shards in one isolated local fixture. Cross-device placement remains planned.",
+    output: "CAPSULE COMMITTED // 6 LOCAL SHARD FILES READY",
   },
   {
     id: "failure",
     step: "02",
     label: "Delete",
-    headline: "Publisher, object, and two shards disappear",
-    detail: "The complete object no longer exists. Four shards remain, exactly at the recovery threshold.",
-    output: "OBJECT ABSENT // SHARDS 01 + 04 LOST",
+    headline: "Source, complete object, and two shards are deleted",
+    detail: "No complete object file remains in the fixture. Four local shard files survive, exactly at the configured recovery threshold.",
+    output: "OBJECT ABSENT // SHARDS 01 + 04 DELETED",
   },
   {
     id: "rebuild",
     step: "03",
     label: "Rebuild",
-    headline: "Surviving shards reconstruct the bytes",
-    detail: "No surviving node holds the complete object. Reconstruction streams into a temporary file.",
+    headline: "Four shard files reconstruct the bytes",
+    detail: "Reconstruction streams into a temporary local file. This step does not involve peers or network transfer.",
     output: "REED SOLOMON MATRIX // 4 OF 4 INPUTS",
   },
   {
     id: "verify",
     step: "04",
     label: "Verify",
-    headline: "Exact digest and trusted signature match",
-    detail: "Only authenticated output is installed. Size, SHA-256, chunk root, and signer trust all pass.",
+    headline: "Digest and explicitly trusted signature match",
+    detail: "The recovered object is published only after its size, SHA-256 digest, chunk root, signature, and imported signer trust pass.",
     output: "SHA-256 MATCH // SIGNATURE TRUSTED // ACCEPT",
   },
 ] as const;
@@ -119,7 +119,7 @@ export function ContinuitySimulator() {
           </div>
 
           <article className={`sim-node sim-target ${isVerified ? "is-verified" : isRebuilding ? "is-building" : ""}`}>
-            <div className="sim-node-head"><span>FRESH NODE</span><span>D</span></div>
+            <div className="sim-node-head"><span>LOCAL RECOVERY TARGET</span><span>R</span></div>
             <div className="verify-glyph" aria-hidden="true">
               <span className="verify-ring" />
               <span className="verify-mark">{isVerified ? "✓" : isRebuilding ? "4/4" : "…"}</span>

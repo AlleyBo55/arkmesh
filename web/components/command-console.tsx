@@ -75,7 +75,7 @@ export function CommandConsole({ compact = false }: { compact?: boolean }) {
             "BENCHMARK             measured local observations",
             "ROADMAP               seven planned system capabilities",
             "PLAN <ID>             design goal and acceptance boundary",
-            "WIKI [SECTION]        open the complete protocol wiki",
+            "WIKI [SECTION]        open the protocol and research wiki",
             "RUN DEMO              show the reproducible recovery command",
             "RELEASE               open v0.1.0-alpha.1",
             "GITHUB                open source repository",
@@ -128,12 +128,13 @@ export function CommandConsole({ compact = false }: { compact?: boolean }) {
       dispatch(
         appendEntry(
           entry(command, [
-            "LIVE CEREMONY :: PASS",
-            "Deleted source + complete object + 2 of 6 shards",
-            "Recovered exact 8 MiB object from 4 surviving shards",
-            "SHA-256 matched signed manifest; trusted author verified",
-            "3-shard attempt refused without writing an object",
-            "COMMAND :: ./scripts/demo-offline-recovery.sh",
+            "REFERENCE CEREMONY :: PUBLISHED PROCEDURE",
+            "Procedure deletes source + complete object + 2 of 6 shards",
+            "Pass condition: exact 8 MiB object recovered from 4 surviving shard files",
+            "Acceptance requires SHA-256, signed manifest, and explicitly imported author trust",
+            "Negative control: a 3-shard attempt must write no object",
+            "REPRODUCE :: ./scripts/demo-offline-recovery.sh",
+            "SCOPE :: local filesystem fixture; no peers or inference",
           ], "success"),
         ),
       );
@@ -144,7 +145,8 @@ export function CommandConsole({ compact = false }: { compact?: boolean }) {
       dispatch(
         appendEntry(
           entry(command, [
-            "APPLE M5 / GO 1.22 / 64 MiB / 3 RUN MEANS",
+            "PUBLISHED RUN :: APPLE M5 / GO 1.22 / 64 MiB / 3 RUN MEANS",
+            "SOURCE COMMIT :: 057ee8d66f52264f2e5615afb883e907d78b4f85",
             ...benchmarkRows.map(([label, result]) => `${label.padEnd(20, ".")} ${result}`),
             "ERASURE OVERHEAD .... 50.00%",
             "AUDIT SAMPLE ......... 349 / 1024 chunks",

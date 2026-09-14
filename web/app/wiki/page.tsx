@@ -1,29 +1,34 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { CommandConsole } from "@/components/command-console";
+import { ResearchReferences, ThesisFrontMatter, WikiFigure } from "@/components/wiki-figures";
 import { plannedCapabilities, wikiSections } from "@/lib/content";
 
 export const metadata: Metadata = {
-  title: "System Wiki",
-  description: "ArkMesh protocol concepts, commands, evidence, security boundaries, and research roadmap.",
+  title: "Research Monograph and System Wiki",
+  description: "ArkMesh research question, hypotheses, system model, protocol evidence, security boundaries, experiments, limitations, and dependency-ordered roadmap.",
 };
 
 export default function WikiPage() {
   return (
-    <main className="content-grid pt-14 md:pt-20">
+    <main id="main-content" className="archive-main content-grid pt-14 md:pt-20">
       <section className="border-b-2 border-cyan-300/50 pb-14">
-        <div className="section-kicker mb-5">Documentation memory map</div>
+        <div className="section-kicker mb-5">Research monograph + living system specification</div>
         <div className="grid gap-8 lg:grid-cols-[1fr_auto] lg:items-end">
           <div>
-            <h1 className="text-5xl font-black uppercase leading-none tracking-[-0.06em] text-white md:text-8xl">System<br /><span className="text-cyan-200">Wiki.</span></h1>
-            <p className="mt-7 max-w-3xl border-l-4 border-cyan-300 pl-5 text-base leading-8 text-blue-100">One screen for the capsule protocol, authority model, repair path, audit claims, security boundaries, evidence, and the seven capabilities still separating the alpha from its full thesis.</p>
+            <h1 className="text-5xl font-black uppercase leading-none tracking-[-0.06em] text-white md:text-8xl">Continuity<br /><span className="text-cyan-200">Thesis.</span></h1>
+            <p className="mt-7 max-w-4xl border-l-4 border-cyan-300 pl-5 text-base leading-8 text-blue-100">A structured account of the ArkMesh research question, competing hypothesis, system model, cryptographic mechanisms, destructive experiments, evidence boundaries, and the seven dependencies still separating local recovery from distributed executable continuity.</p>
+            <p className="mt-5 max-w-4xl text-sm leading-7 text-blue-300">This document uses an academic structure but has no institutional authorship, external peer review, or formal publication. Demonstrated results name implementation evidence; unsupported conclusions remain open questions.</p>
           </div>
           <div className="blue-panel min-w-64 p-4 text-xs uppercase tracking-widest">
-            <p className="text-blue-300">Documents indexed</p><p className="mt-2 text-3xl font-black text-white">{wikiSections.length.toString().padStart(2, "0")}</p>
-            <p className="mt-5 text-blue-300">Planned systems</p><p className="mt-2 text-3xl font-black text-amber-300">{plannedCapabilities.length.toString().padStart(2, "0")}</p>
+            <p className="text-blue-300">Research chapters</p><p className="mt-2 text-3xl font-black text-white">{wikiSections.length.toString().padStart(2, "0")}</p>
+            <p className="mt-5 text-blue-300">Open dependencies</p><p className="mt-2 text-3xl font-black text-amber-300">{plannedCapabilities.length.toString().padStart(2, "0")}</p>
+            <p className="mt-5 text-blue-300">Peer review</p><p className="mt-2 font-black text-rose-300">NOT YET</p>
           </div>
         </div>
       </section>
+
+      <ThesisFrontMatter />
 
       <div className="grid gap-12 lg:grid-cols-[240px_minmax(0,1fr)]">
         <aside className="hidden lg:block">
@@ -56,6 +61,8 @@ export default function WikiPage() {
                 {section.paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
               </div>
 
+              <WikiFigure section={section.id} />
+
               {section.id === "roadmap" ? (
                 <div className="mt-9 grid gap-3 md:grid-cols-2">
                   {plannedCapabilities.map((item) => (
@@ -86,6 +93,8 @@ export default function WikiPage() {
               ) : null}
             </section>
           ))}
+
+          <ResearchReferences />
 
           <section className="wiki-section" aria-labelledby="wiki-console-title">
             <div className="section-kicker mb-5">Interactive index</div>

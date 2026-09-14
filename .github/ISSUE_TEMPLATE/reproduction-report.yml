@@ -1,0 +1,63 @@
+name: Reproduction report
+description: Report an independent ArkMesh test, recovery ceremony, benchmark, or discrepancy
+title: "reproduction: "
+labels:
+  - "type: experiment"
+  - "status: needs evidence"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Independent failures are valuable evidence. Include exact commands and raw output when safe, but never upload restricted model files, credentials, private data, or vulnerability details.
+  - type: input
+    id: revision
+    attributes:
+      label: Revision tested
+      description: Commit SHA or release tag
+      placeholder: v0.1.0-alpha.1 or full commit SHA
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Operating system, architecture, Go version, hardware, filesystem, and relevant limits.
+    validations:
+      required: true
+  - type: textarea
+    id: commands
+    attributes:
+      label: Exact commands
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected result
+    validations:
+      required: true
+  - type: textarea
+    id: observed
+    attributes:
+      label: Observed result and raw output
+    validations:
+      required: true
+  - type: dropdown
+    id: outcome
+    attributes:
+      label: Outcome
+      options:
+        - Reproduced as documented
+        - Reproduced with a discrepancy
+        - Did not reproduce
+        - Inconclusive
+    validations:
+      required: true
+  - type: checkboxes
+    id: safe
+    attributes:
+      label: Safety check
+      options:
+        - label: This report contains no restricted model material, credentials, private data, or unpatched vulnerability details.
+          required: true
